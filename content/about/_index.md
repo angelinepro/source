@@ -3,6 +3,7 @@ date = "2016-11-05T21:05:33+05:30"
 title = "about"
 +++
 
+![Me][1]
 
 I am a data nerd, and this is where I share my data adventures, covering topics I can write about publicly. Analytic projects I can't write about publicly include health data collected with personal identifiers, with datasets and code containing sensitive information. If you are interested in that work, click on the publications link in the sidebar (you won't find code or datasets associated with these projects).
 

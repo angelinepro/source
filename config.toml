@@ -34,14 +34,15 @@ publishDir = "../angelinepro.github.io"
   #email = "you@yoursite.com"
 
   # Nav links in the side bar
-  [[params.navlinks]]
-  name = "home"
-  url = "portfolio/"
-  home = true
+  #[[params.navlinks]]
+  #name = "portfolio"
+  #url = "portfolio/"
+
 
   [[params.navlinks]]
-  name = "about"
+  name = "home"
   url = "about/"
+  home = true
 
   [[params.navlinks]]
   name = "publications"
