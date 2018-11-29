@@ -1,0 +1,781 @@
+---
+title: Drafting Batters in Fantasy Baseball, Part 1
+author: Angeline Protacio
+date: '2018-11-29'
+weight: 1
+slug: drafting-batters-part-1
+output:
+  blogdown::html_page:
+    toc: true 
+categories: []
+tags:
+  - R
+  - baseball
+  - fantasy
+  - ggplot2
+  - WAR
+description: "Does this baseball-loving data nerd have a shot at winning her Fantasy Baseball league?"
+image: "img/portfolio/hyacinth.jpg"
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#my-first-season-in-fantasy-baseball">My first season in Fantasy Baseball</a></li>
+<li><a href="#what-is-fantasy-baseball">What is Fantasy Baseball?</a></li>
+<li><a href="#the-draft">The Draft</a></li>
+<li><a href="#how-i-prepared-for-the-draft">How I Prepared for the Draft</a></li>
+<li><a href="#my-draft-strategy">My Draft Strategy</a></li>
+<li><a href="#up-next">Up Next</a></li>
+</ul>
+</div>
+
+<div id="my-first-season-in-fantasy-baseball" class="section level3">
+<h3>My first season in Fantasy Baseball</h3>
+<p>I joined an ESPN Fantasy Baseball League for the first time this year, which may come as a shock to those of you who know that I love both baseball and data. I was in an ESPN Fantasy Basketball League a few years ago, but because I haven’t watched basketball seriously in about 15 years, these were two very unsatisfying seasons. I was hoping it would encourage me to watch more basketball, but instead I made zero moves, stubbornly refused to trade Kevin Durant, and effectively set my league fees on fire.</p>
+<div class="figure">
+<img src="https://media.giphy.com/media/5aoTMpLEIxlfi/giphy.gif" />
+
+</div>
+<p>Unsurprisingly, this strategy did not help me win.</p>
+<p>Finally, this year, a friend invited me to join his newly founded fantasy baseball league. The fees were a bit steep ($50), and I didn’t really make much progress in my prior fantasy leagues, but I decided to join up anyway. I actually watch baseball, and this seemed like a better incentive to learn how to play fantasy sports. So I signed up, with a vague sense that I was about to go down the <a href="https://media.giphy.com/media/4BgQaxfQfeqys/giphy.gif">rabbit hole</a>.</p>
+<p>There are a lot of parts to Fantasy Baseball, so I’m going to break this up into several posts. This series will focus on batters. I’m going to start this post with a brief introduction to Fantasy Baseball (geared toward those with little to no experience, and a limited understanding of baseball), this year’s draft strategy for batters, and reflections on the metrics I used. The second post will dive a little deeper into positional talent, and how that relates to the metrics I used. The third post will detail an alternate draft strategy, where I beat myself up about the drafting decisions I made. In each post, I included the R code I used to explore the player data and to develop a draft strategy, in case you are interested in implementing some of this analysis on your own.</p>
+<p>I wrote this article because my initial search for fantasy baseball strategies returned many articles written for people with substantial prior fantasy sports experience. I wanted a reference for someone without significant experience in fantasy sports, that could be implemented by someone with a surface level understanding of baseball and minimal statistics knowledge. I decided to write the guide I wanted to read before this all began. Let’s begin.</p>
+</div>
+<div id="what-is-fantasy-baseball" class="section level3">
+<h3>What is Fantasy Baseball?</h3>
+<p>Fantasy leagues are made up of several teams competing against each other to win certain scoring categories. For those who have never played any fantasy sports, I’ll use my league as an example.</p>
+<p>My league uses the following scoring categories:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Batting</th>
+<th>Pitching</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Runs (R)</td>
+<td>Strikeouts (SO)</td>
+</tr>
+<tr class="even">
+<td>Home Runs (HR)</td>
+<td>Quality Starts (QS)</td>
+</tr>
+<tr class="odd">
+<td>Runs Batted In (RBI)</td>
+<td>Saves (SV)</td>
+</tr>
+<tr class="even">
+<td>Strikeouts (SO)</td>
+<td>Earned Runs Average (ERA)</td>
+</tr>
+<tr class="odd">
+<td>Stolen Bases (SB)</td>
+<td>Walks, Hits per Inning Pitched (WHIP)</td>
+</tr>
+<tr class="even">
+<td>On Base Percentage Plus Slugging (OPS)</td>
+<td>Strikeouts per Walk (SO_BB)</td>
+</tr>
+</tbody>
+</table>
+<p>If you aren’t super familiar with baseball and want to understand these scoring categories and any terminology that comes up, Fangraphs has a great glossary for <a href="https://www.fangraphs.com/library/offense/offensive-statistics-list/">offensive statistics</a> and <a href="https://www.fangraphs.com/library/pitching/complete-list-pitching/">pitching statistics</a>.</p>
+<p>Each team in the league drafts players to create a roster, with the goal of winning as many scoring categories as possible. Each player’s real-life numbers contribute to the weekly matchup. For instance, if Mike Trout is on my fantasy team, and real-life Mike Trout hits three home runs that week, those three home runs count for my team.</p>
+<p>Each week, my team plays against an opponent. If my team scores 20 runs that week, and my opponent’s team scores 18 runs that week, I win the Runs category for that week. If my team strikes out 10 times, and my opponent’s team strikes out 8 times, my opponent wins the Strikeouts category for that week (because striking out is bad). Categories won, lost, and tied are counted up each week. Throughout the 21 weeks of the fantasy season, I want to win as many categories as possible.</p>
+<p>Before play begins, however, there is a league draft.</p>
+</div>
+<div id="the-draft" class="section level3">
+<h3>The Draft</h3>
+<p>In the draft, each team takes turns drafting players to fill their available positions. For batting, there are a total of thirteen slots, comprising eight fielding positions (catcher, first base, second base, short stop, third base, and left, center, and right field), plus two utility players (any position). For pitching, there are a total of fourteen slots, comprising three starting pitchers, three relief pitchers, and then four for either starters or relievers. There are seven spots available for bench players, which can be divided up between batters and pitchers as you wish. I’ll discuss pitching in another post, but my drafted batters looked like this:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Position</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Catcher (C)</td>
+<td>Buster Posey (C)</td>
+</tr>
+<tr class="even">
+<td>First Base (1B)</td>
+<td>Edwin Encarnacion (1B)</td>
+</tr>
+<tr class="odd">
+<td>Second Base (2B)</td>
+<td>Rougned Odor (2B)</td>
+</tr>
+<tr class="even">
+<td>Third Base (3B)</td>
+<td>Mike Moustakas (3B)</td>
+</tr>
+<tr class="odd">
+<td>Shortstop (SS)</td>
+<td>Andrelton Simmons (SS)</td>
+</tr>
+<tr class="even">
+<td>Outfield (OF)</td>
+<td>Mookie Betts (OF)</td>
+</tr>
+<tr class="odd">
+<td>Outfield (OF)</td>
+<td>Adam Jones (OF)</td>
+</tr>
+<tr class="even">
+<td>Outfield (OF)</td>
+<td>Max Kepler (OF)</td>
+</tr>
+<tr class="odd">
+<td>Utility (UTIL)</td>
+<td>Brandon Crawford (SS)</td>
+</tr>
+<tr class="even">
+<td>Utility (UTIL)</td>
+<td>Brandon Belt (1B)</td>
+</tr>
+<tr class="odd">
+<td>Bench</td>
+<td>Stephen Piscotty (OF)</td>
+</tr>
+<tr class="even">
+<td>Bench</td>
+<td>Maikel Franco (3B)</td>
+</tr>
+<tr class="odd">
+<td>Bench</td>
+<td>Jose Peraza (SS)</td>
+</tr>
+<tr class="even">
+<td>Bench</td>
+<td>Manuel Margot (OF)</td>
+</tr>
+</tbody>
+</table>
+<p>Once these players are drafted, they are on your team, but throughout the course of the season, you can drop players who aren’t contributing, add free agents who aren’t currently on a team, and trade with other teams for players you want. There is figurative cash involved with adding free agents to your team, which I’ll discuss in another post.</p>
+<p>The draft is important because this may be the only opportunity to pick up high performing players. Players like Mike Trout, or Mookie Betts, for instance, are unlikely to be dropped once they’re drafted, barring injury or disaster. It’s important to go into the draft with a strategy, or at least, some idea of how you want to select players. I’d previously spent maybe two hours preparing for my Fantasy Basketball drafts, so I thought this time, I’d devote an afternoon to it. This was not enough time, in hindsight.</p>
+<p><img src="https://media.giphy.com/media/3o7TKpWMuZga6QURwI/giphy.gif" /> <br/><br/></p>
+</div>
+<div id="how-i-prepared-for-the-draft" class="section level3">
+<h3>How I Prepared for the Draft</h3>
+<p>I downloaded player projection data from Fangraphs. The projection data is a prediction of how a player will perform, based on historical numbers. Each of the projection systems differs a bit, but the one I used was the <a href="https://www.fangraphs.com/projections.aspx?pos=all&amp;stats=bat&amp;type=rzips&amp;team=0&amp;lg=all&amp;players=0">ZIPS projection</a>, because it was the first projection system I found on Fangraphs. I only had an afternoon, after all! I exported data from the site for each of the batting positions. I saved them to a folder called “data” in my R Project directory, renamed the files for readability, and combined all of the data for each position into one data frame called “batters”, with a variable called “position”. I also removed all other categories that I deemed irrelevant for making draft decisions.</p>
+<p>I’m loading in <a href="https://dplyr.tidyverse.org/">dplyr</a> to facilitate data cleaning (and because I’m addicted to <a href="https://media.giphy.com/media/UhZ4aTuiZeKha/giphy.gif">pipes</a>), <a href="https://ggplot2.tidyverse.org/">ggplot2</a> for easy visualizations, and <a href="https://purrr.tidyverse.org/">purrr</a> to simplify loading. I’m also loading in <a href="https://github.com/karthik/wesanderson">wesanderson</a> to make my visualizations a little nicer to look at. I’ve written a function called load_data to minimize repetitive code. See the github repository for that code.</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(purrr)
+library(wesanderson)
+
+source(&quot;../R/load_data.R&quot;)
+
+pos_files &lt;- c(&quot;../data/post1/depth_1B.csv&quot;, &quot;../data/post1/depth_2b.csv&quot;, &quot;../data/post1/depth_3b.csv&quot;, &quot;../data/post1/depth_SS.csv&quot;, &quot;../data/post1/depth_OF.csv&quot;, &quot;../data/post1/depth_C.csv&quot;)
+pos_names &lt;- c(&quot;first_base&quot;, &quot;second_base&quot;, &quot;third_base&quot;, &quot;short&quot;, &quot;outfield&quot;, &quot;catcher&quot;)
+batters &lt;- map2_df(pos_files, pos_names, load_data) %&gt;%
+  select(Name, Team, playerid, position, PA, R, HR, RBI, SB, OPS, SO, WAR)</code></pre>
+<p><br/><br/></p>
+</div>
+<div id="my-draft-strategy" class="section level3">
+<h3>My Draft Strategy</h3>
+<p>An afternoon is not enough time to learn about how to play fantasy baseball and come up with a cohesive, overarching draft strategy. Instead, I did a few quick calculations to empower me to make decisions about whom to draft in the moment, based on what players are available, what positions they play, which scoring categories are strengths for my team, and what gaps remain. To help inform timely draft decisions, I planned to create rank variables for each of the scoring categories, putting each player into quantiles for each category. Six scoring categories is an awful lot to synthesize in the two minutes given to select a player, so I needed to also rank some statistic that accounts for all six scoring categories. Based on my limited research, I decided to use <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement). WAR is often used as a summary statistic to characterize a player’s total contributions to their team.</p>
+<p>How WAR is calculated differs by source. I got my projected WAR data from Fangraphs, and their WAR is calculated using a combination of offensive, defensive, and base running statistics. WAR was already part of the data I downloaded from Fangraphs, so I thankfully didn’t need to calculate a new statistic. Seems easy enough. However, all of my scoring categories are based on offensive statistics. WAR, while accounting for offensive statistics, also accounts for defense and base running, which are irrelevant to my scoring categories. Someone who has a high WAR may be excellent defensively, but may put up average offensive numbers. They may not help me win my scoring categories. I didn’t take this into account when preparing for my draft, but it ended up coming back to bite me later on.</p>
+<div id="war-what-is-it-good-for" class="section level4">
+<h4>WAR, What is it Good For?</h4>
+<p>I looked at the distribution of projected WAR among all the players in the dataset, to understand how to split players into quantiles. I used a histogram to make sure the number of quantiles I wanted to split players into was large enough to capture the variance in WAR. If I split players up into too few quantiles, I might collapse exceptional players (WAR &gt; 6) with reasonably good players (WAR = 3). If I split players into too many quantiles, I’ll end up with one player in each, which is not helpful for making comparisons.</p>
+<pre class="r"><code>ggplot(batters, aes(x=WAR)) + 
+  geom_histogram(bins = 50, fill = &quot;#DD8D29&quot;) + 
+  theme_bw()</code></pre>
+<p><img src="/portfolio/2018-11-29-drafting-batters-in-fantasy-baseball-part-1_files/figure-html/WAR-histo-1.png" width="672" /></p>
+<p>Based on the distribution, and the quantity that seemed reasonable to examine at a time, I decided to split batters up into quantiles of 50. My logic for this is that when choosing whom to draft, I’d be in good hands selecting any player in the top 2% of WAR. There were roughly 12-13 players in each quantile, which is enough to make comparisons across players. These players in the table below represent the top 2% of WAR.</p>
+<pre class="r"><code>batters$qt_WAR &lt;- ntile(batters$WAR, 50)
+batters %&gt;% 
+  filter(qt_WAR == 50) %&gt;% 
+  select(position, Name, WAR, SO, SB) %&gt;% 
+  arrange(desc(WAR)) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">WAR</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Mike Trout</td>
+<td align="right">8.2</td>
+<td align="right">131</td>
+<td align="right">22</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Giancarlo Stanton</td>
+<td align="right">6.4</td>
+<td align="right">171</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Josh Donaldson</td>
+<td align="right">6.2</td>
+<td align="right">134</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Carlos Correa</td>
+<td align="right">6.1</td>
+<td align="right">121</td>
+<td align="right">8</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Kris Bryant</td>
+<td align="right">5.9</td>
+<td align="right">147</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Francisco Lindor</td>
+<td align="right">5.8</td>
+<td align="right">84</td>
+<td align="right">15</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Bryce Harper</td>
+<td align="right">5.6</td>
+<td align="right">122</td>
+<td align="right">10</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Mookie Betts</td>
+<td align="right">5.6</td>
+<td align="right">73</td>
+<td align="right">23</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Manny Machado</td>
+<td align="right">5.3</td>
+<td align="right">105</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Corey Seager</td>
+<td align="right">5.2</td>
+<td align="right">120</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Nolan Arenado</td>
+<td align="right">5.0</td>
+<td align="right">101</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Jose Ramirez</td>
+<td align="right">4.8</td>
+<td align="right">67</td>
+<td align="right">20</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Jose Ramirez</td>
+<td align="right">4.8</td>
+<td align="right">67</td>
+<td align="right">20</td>
+</tr>
+</tbody>
+</table>
+<p>Jose Ramirez appears twice because he’s eligible to play two positions. I didn’t clean any of the data up in that regard.</p>
+<p>I ended up selecting Mookie Betts in my first round, because in addition to a high WAR, he was projected to steal more bases (high SB), and strike out less often (low SO) than others in the top 2%. Nearly everyone else in this group was selected in the first round, so I needed to set my sights a little lower, the top 4%.</p>
+<pre class="r"><code>batters %&gt;% 
+  filter(qt_WAR == 49) %&gt;% 
+  select(position, Name, WAR, SO, SB) %&gt;% 
+  arrange(desc(WAR)) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">WAR</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Joey Votto</td>
+<td align="right">4.8</td>
+<td align="right">105</td>
+<td align="right">5</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Jose Altuve</td>
+<td align="right">4.8</td>
+<td align="right">73</td>
+<td align="right">28</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Anthony Rizzo</td>
+<td align="right">4.7</td>
+<td align="right">98</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">third_base</td>
+<td align="left">Justin Turner</td>
+<td align="right">4.6</td>
+<td align="right">84</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Anthony Rendon</td>
+<td align="right">4.6</td>
+<td align="right">100</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">George Springer</td>
+<td align="right">4.5</td>
+<td align="right">137</td>
+<td align="right">9</td>
+</tr>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Buster Posey</td>
+<td align="right">4.5</td>
+<td align="right">62</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Aaron Judge</td>
+<td align="right">4.4</td>
+<td align="right">198</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Freddie Freeman</td>
+<td align="right">4.3</td>
+<td align="right">134</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">first_base</td>
+<td align="left">Paul Goldschmidt</td>
+<td align="right">4.3</td>
+<td align="right">147</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Kevin Kiermaier</td>
+<td align="right">4.1</td>
+<td align="right">134</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">third_base</td>
+<td align="left">Kyle Seager</td>
+<td align="right">3.9</td>
+<td align="right">106</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Alex Bregman</td>
+<td align="right">3.8</td>
+<td align="right">98</td>
+<td align="right">14</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Andrelton Simmons</td>
+<td align="right">3.8</td>
+<td align="right">64</td>
+<td align="right">13</td>
+</tr>
+</tbody>
+</table>
+<p>I picked Buster Posey as a second rounder for his high WAR, and his low number of strikeouts relative to everyone else in his group. Andrelton Simmons was my fourth rounder for the same reason, with more stolen bases.</p>
+<p>Seems good so far, right?</p>
+<p><img src="https://media.giphy.com/media/l0MYDpc4QeyN2Dmqk/giphy.gif" /> <br/><br/> As I mentioned above, WAR relies on more than just the scoring categories I care about. In fact, looking at Posey and Simmons, their projections for the scoring categories are low relative to other players with a similar WAR. They are on the lower end for scoring runs (R), hitting homeruns (HR), runs batted in (RBI), and getting on base/hitting for extra bases (OPS).</p>
+<pre class="r"><code>batters %&gt;% 
+  filter(qt_WAR == 49) %&gt;% 
+  select(position, Name, R, HR, RBI, SO, SB, OPS, WAR) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+<th align="right">OPS</th>
+<th align="right">WAR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Joey Votto</td>
+<td align="right">95</td>
+<td align="right">28</td>
+<td align="right">92</td>
+<td align="right">105</td>
+<td align="right">5</td>
+<td align="right">0.952</td>
+<td align="right">4.8</td>
+</tr>
+<tr class="even">
+<td align="left">first_base</td>
+<td align="left">Freddie Freeman</td>
+<td align="right">92</td>
+<td align="right">31</td>
+<td align="right">93</td>
+<td align="right">134</td>
+<td align="right">8</td>
+<td align="right">0.935</td>
+<td align="right">4.3</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Anthony Rizzo</td>
+<td align="right">97</td>
+<td align="right">34</td>
+<td align="right">107</td>
+<td align="right">98</td>
+<td align="right">9</td>
+<td align="right">0.927</td>
+<td align="right">4.7</td>
+</tr>
+<tr class="even">
+<td align="left">first_base</td>
+<td align="left">Paul Goldschmidt</td>
+<td align="right">101</td>
+<td align="right">31</td>
+<td align="right">103</td>
+<td align="right">147</td>
+<td align="right">17</td>
+<td align="right">0.927</td>
+<td align="right">4.3</td>
+</tr>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Jose Altuve</td>
+<td align="right">94</td>
+<td align="right">20</td>
+<td align="right">82</td>
+<td align="right">73</td>
+<td align="right">28</td>
+<td align="right">0.859</td>
+<td align="right">4.8</td>
+</tr>
+<tr class="even">
+<td align="left">third_base</td>
+<td align="left">Justin Turner</td>
+<td align="right">77</td>
+<td align="right">22</td>
+<td align="right">84</td>
+<td align="right">84</td>
+<td align="right">6</td>
+<td align="right">0.856</td>
+<td align="right">4.6</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Anthony Rendon</td>
+<td align="right">85</td>
+<td align="right">22</td>
+<td align="right">86</td>
+<td align="right">100</td>
+<td align="right">8</td>
+<td align="right">0.849</td>
+<td align="right">4.6</td>
+</tr>
+<tr class="even">
+<td align="left">third_base</td>
+<td align="left">Alex Bregman</td>
+<td align="right">88</td>
+<td align="right">22</td>
+<td align="right">82</td>
+<td align="right">98</td>
+<td align="right">14</td>
+<td align="right">0.809</td>
+<td align="right">3.8</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Kyle Seager</td>
+<td align="right">79</td>
+<td align="right">28</td>
+<td align="right">92</td>
+<td align="right">106</td>
+<td align="right">3</td>
+<td align="right">0.816</td>
+<td align="right">3.9</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Andrelton Simmons</td>
+<td align="right">70</td>
+<td align="right">11</td>
+<td align="right">67</td>
+<td align="right">64</td>
+<td align="right">13</td>
+<td align="right">0.710</td>
+<td align="right">3.8</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Aaron Judge</td>
+<td align="right">99</td>
+<td align="right">41</td>
+<td align="right">106</td>
+<td align="right">198</td>
+<td align="right">7</td>
+<td align="right">0.901</td>
+<td align="right">4.4</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">George Springer</td>
+<td align="right">100</td>
+<td align="right">31</td>
+<td align="right">86</td>
+<td align="right">137</td>
+<td align="right">9</td>
+<td align="right">0.861</td>
+<td align="right">4.5</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Kevin Kiermaier</td>
+<td align="right">76</td>
+<td align="right">19</td>
+<td align="right">62</td>
+<td align="right">134</td>
+<td align="right">21</td>
+<td align="right">0.743</td>
+<td align="right">4.1</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">Buster Posey</td>
+<td align="right">64</td>
+<td align="right">14</td>
+<td align="right">69</td>
+<td align="right">62</td>
+<td align="right">4</td>
+<td align="right">0.821</td>
+<td align="right">4.5</td>
+</tr>
+</tbody>
+</table>
+<p>Picking these two in the second and fourth round, in hindsight, was not the best idea. In fact, it may not make sense to use WAR to differentiate between players in the early rounds because there is a high opportunity cost to missing out on strong offensive players that actually contribute to scoring categories. Sorry, Buster.</p>
+<p><img src="https://media.giphy.com/media/WeMQzWA2aiJuU/giphy.gif" /> <br/><br/></p>
+</div>
+<div id="warning-signs" class="section level4">
+<h4>WARning Signs</h4>
+<p>I plotted a standardized version of each of the scoring categories against WAR. I standardized the scoring categories to simplify interpretation and visualization, since the range differs greatly across the scoring categories.</p>
+<pre class="r"><code>source(&quot;../R/z_score.R&quot;)
+
+ggplot(batters %&gt;%
+  mutate(
+    R_z = z_score(R),
+    HR_z = z_score(HR),
+    RBI_z = z_score(RBI),
+    OPS_z = z_score(OPS),
+    SB_z = z_score(SB),
+    SO_z = -z_score(SO)) %&gt;%
+  select(position, Name, Team, R_z, HR_z, RBI_z, SB_z, OPS_z, SO_z, WAR) %&gt;%
+  tidyr::gather(key = stat, value = value, R_z, HR_z, RBI_z, SB_z, OPS_z, SO_z), 
+  aes(x=WAR, y = value, colour = stat)) +
+  geom_point() + 
+  facet_wrap(~stat, nrow = 3) + 
+  theme_bw() + 
+  scale_colour_manual(values = wes_palette(&quot;FantasticFox1&quot;, 6, type = &quot;continuous&quot;)) + 
+  theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="/portfolio/2018-11-29-drafting-batters-in-fantasy-baseball-part-1_files/figure-html/plot-WAR-categories-1.png" width="672" /></p>
+<p>WAR doesn’t correlate with all of the scoring categories. In fact, WAR doesn’t seem to relate to stolen bases or strikeouts at all.</p>
+</div>
+<div id="war-is-not-the-answer-good-god-yall" class="section level4">
+<h4>WAR is Not the Answer (Good God, Y’all)</h4>
+<p>It looks like WAR isn’t great for identifying strong offensive players (the kind that would help win scoring categories), and it’s not even related to stealing bases or striking out. I should perhaps not rely on an overall summary category to guide my decisions, and rank players based on their projected performance for each scoring category. The performance in the scoring categories is what matters, in the end.</p>
+<p>So I split players into quantiles by 50 again, and ranked each scoring category separately. This time, I filtered results to players who were in the top 4% of projections for runs, home runs, runs batted in, and on base plus slugging. I limited it to these four scoring categories because no player was in the top 4% for all six, and only Mike Trout was in the top 4% for these four categories plus base stealing.</p>
+<div class="figure">
+<img src="https://media.giphy.com/media/YWoB4KtzoBDu39C6DQ/giphy.gif" />
+
+</div>
+<p>While I’m sure it’s useful to know how great Mike Trout is, I was picking sixth, so I had no chance of drafting him anyway. Nothing to see here.</p>
+<p>So which players are the cream of the crop for my four scoring categories?</p>
+<pre class="r"><code>batters &lt;- batters %&gt;%
+  mutate(qt_R = ntile(batters$R, 50),
+         qt_HR = ntile(batters$HR, 50), 
+         qt_RBI = ntile(batters$RBI, 50), 
+         qt_OPS = ntile(batters$OPS, 50),
+         qt_SO = ntile(desc(batters$SO), 50),
+         qt_SB = ntile(batters$SB, 50))
+
+batters %&gt;% 
+  filter(qt_R &gt; 48 &amp; qt_HR &gt; 48 &amp; qt_RBI &gt; 48 &amp; qt_OPS &gt; 48) %&gt;% 
+  select(position, Name, R, HR, RBI, OPS, SO, SB) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">OPS</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Anthony Rizzo</td>
+<td align="right">97</td>
+<td align="right">34</td>
+<td align="right">107</td>
+<td align="right">0.927</td>
+<td align="right">98</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">first_base</td>
+<td align="left">Rhys Hoskins</td>
+<td align="right">92</td>
+<td align="right">36</td>
+<td align="right">111</td>
+<td align="right">0.877</td>
+<td align="right">140</td>
+<td align="right">5</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Edwin Encarnacion</td>
+<td align="right">92</td>
+<td align="right">36</td>
+<td align="right">109</td>
+<td align="right">0.869</td>
+<td align="right">131</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">third_base</td>
+<td align="left">Nolan Arenado</td>
+<td align="right">97</td>
+<td align="right">39</td>
+<td align="right">118</td>
+<td align="right">0.937</td>
+<td align="right">101</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Josh Donaldson</td>
+<td align="right">98</td>
+<td align="right">36</td>
+<td align="right">102</td>
+<td align="right">0.912</td>
+<td align="right">134</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Mike Trout</td>
+<td align="right">114</td>
+<td align="right">39</td>
+<td align="right">105</td>
+<td align="right">1.027</td>
+<td align="right">131</td>
+<td align="right">22</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Giancarlo Stanton</td>
+<td align="right">109</td>
+<td align="right">58</td>
+<td align="right">140</td>
+<td align="right">1.029</td>
+<td align="right">171</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Bryce Harper</td>
+<td align="right">100</td>
+<td align="right">35</td>
+<td align="right">102</td>
+<td align="right">0.984</td>
+<td align="right">122</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Aaron Judge</td>
+<td align="right">99</td>
+<td align="right">41</td>
+<td align="right">106</td>
+<td align="right">0.901</td>
+<td align="right">198</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Rhys Hoskins</td>
+<td align="right">92</td>
+<td align="right">36</td>
+<td align="right">111</td>
+<td align="right">0.877</td>
+<td align="right">140</td>
+<td align="right">5</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Cody Bellinger</td>
+<td align="right">91</td>
+<td align="right">39</td>
+<td align="right">110</td>
+<td align="right">0.882</td>
+<td align="right">159</td>
+<td align="right">13</td>
+</tr>
+</tbody>
+</table>
+<p>This group is in the top 4% of projections for runs, home runs, runs batted in, and OPS. This would have been a solid group to start with. After my early draft picks based on WAR, I went with this strategy and loosened the filtering criteria as we got further along in the draft. I also made sure to occasionally select players who were projected to have more stolen bases and fewer strikeouts. This strategy requires a lot of analysis in the moment, which can lead to a very stressful three hour draft.</p>
+<p><img src="https://media.giphy.com/media/l1KVaj5UcbHwrBMqI/giphy.gif" /> <br/><br/></p>
+</div>
+</div>
+<div id="up-next" class="section level3">
+<h3>Up Next</h3>
+<p>So what happened? Was the stress worth it? Did it end up being a reasonable draft strategy? I’ll discuss that in the <a href="/../portfolio/drafting-batters-part-3">third part</a> of this series. In the <a href="/../portfolio/drafting-batters-part-2">next part</a>, I’ll explore positional talent. Nevermind that I drafted Buster Posey in the second round, but should I have drafted ANY catcher in the second round? Would I have been better off drafting a player from some other position? Which positions are preferable to select from in the early rounds? This will all be covered in the <a href="/../portfolio/drafting-batters-part-2">next post</a>. Stay tuned!</p>
+<p><img src="https://media.giphy.com/media/l0HlBxMf5YHnBdQmk/giphy.gif" /> <br/><br/></p>
+<p><a href="/../portfolio/drafting-batters-part-2">Drafting Batters in Fantasy Baseball, Part 2</a></p>
+<p><a href="/../portfolio/drafting-batters-part-3">Drafting Batters in Fantasy Baseball, Part 3</a></p>
+</div>

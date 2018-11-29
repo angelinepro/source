@@ -16,7 +16,7 @@ publishDir = "../angelinepro.github.io"
   copyright = "&copy;2018 Angeline Protacio"
   sidebarAbout = [
     "I'm reading:",
-    "America is in the Heart, by Carlos Bulosan",
+    "Artemis, by Andy Weir",
     ""
   ]
   # Contact page
@@ -34,15 +34,15 @@ publishDir = "../angelinepro.github.io"
   #email = "you@yoursite.com"
 
   # Nav links in the side bar
-  #[[params.navlinks]]
-  #name = "portfolio"
-  #url = "portfolio/"
-
-
   [[params.navlinks]]
-  name = "home"
-  url = "about/"
+  name = "portfolio"
+  url = "portfolio/"
   home = true
+
+ # [[params.navlinks]]
+#  name = "home"
+#  url = "about/"
+
 
   [[params.navlinks]]
   name = "publications"

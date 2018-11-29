@@ -3,6 +3,8 @@ date = "2016-11-06T13:00:25+05:30"
 title = "publications"
 +++
 
+<b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief107.pdf">Mental Health Emergency Department Visits among New York City Adults, 2015. </a> New York Department of Health and Mental Hygiene Epi Data Brief. 2018 November.
+
 Tang E, <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief101.pdf">Suicides among females in New York City, 2006 to 2015. </a>New York City Department of Health and Mental Hygiene Epi Data Brief. 2018 May.
 
 Terry MB, Keegan THM, Houghton LC, Goldberg M, Andrulis IL, Daly MB, Buys SS, Wei Y, Whittemore

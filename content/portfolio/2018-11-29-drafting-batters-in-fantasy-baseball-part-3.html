@@ -1,0 +1,788 @@
+---
+title: Drafting Batters in Fantasy Baseball, part 3
+author: Angeline Protacio
+date: '2018-11-29'
+slug: drafting-batters-part-3
+output:
+  blogdown::html_page:
+    toc: true 
+weight: 3
+categories: []
+tags:
+  - R
+  - baseball
+  - fantasy
+  - Z-scores
+image: "img/portfolio/tulip.jpg"
+description: "I never trusted WAR"
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#okay-now-where-were-we">Okay, now where were we?</a></li>
+<li><a href="#there-is-another-way">There is another way!</a></li>
+<li><a href="#up-next">Up Next</a></li>
+</ul>
+</div>
+
+<div id="okay-now-where-were-we" class="section level3">
+<h3>Okay, now where were we?</h3>
+<p>If you’re reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading <a href="/../portfolio/drafting-batters-part-1">this</a> first. <br> </br> In the last two posts, I wrote about my draft strategy using projected WAR, and explored fantasy talent by defensive position. I discovered that <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement) was not a great way to select players given my league’s scoring categories. In the absence of a summary statistic to guide my decisions, I looked at all of the scoring categories. I was pretty frazzled by the end of the draft.</p>
+<center>
+<img src="https://media.giphy.com/media/1jl173guBKkbvC03rQ/giphy.gif", style="width:450px;"></img>
+</center>
+<p><br/><br/></p>
+</div>
+<div id="there-is-another-way" class="section level3">
+<h3>There is another way!</h3>
+<p>In doing research for writing this blog post, I found this <a href="https://fantasysixpack.net/creating-fantasy-baseball-player-rater/">article</a> on setting up my own rankings based on my league scoring categories, using z-scores. It’s a simple statistic that identifies who is above the mean, and by how much. This is so simple, I was kicking myself for using it on draft day. Here’s how it works.</p>
+<div id="create-z-scores" class="section level4">
+<h4>Create Z-Scores</h4>
+<pre class="r"><code>bat_z &lt;- batters %&gt;%
+  filter(PA &gt;= 300) %&gt;%
+  select(playerid, position, Name, Team, R, HR, RBI, SO, SB, OPS, WAR) %&gt;%
+  mutate(R_z = z_score(R),
+         HR_z = z_score(HR),
+         RBI_z = z_score(RBI),
+         SO_z = -z_score(SO),
+         SB_z = z_score(SB),
+         OPS_z = z_score(OPS),
+         tot_z = round((R_z + HR_z + RBI_z + SO_z + SB_z + OPS_z), 3))</code></pre>
+<p>I took the same batters dataset and filtered it just to include those with 300 or more plate appearances. Since I’m standardizing, I wanted to exclude players without sufficient playing time, who may have really low predicted runs, home runs, RBIs, strikeouts, or stolen bases just because of small samples. These players may also have extreme predicted OPS statistics (really high, or really low) because of small samples. I didn’t want to draft players who weren’t projected to play for most of the season, and 300 plate appearances is roughly two appearances per game. This effectively halved the batters in my dataset.</p>
+<p>Once I filtered based on that criteria, I calculated the mean and standard deviation for the remaining players, and used that to calculate a z-score, indicating how extreme (either positive or negative) that player’s numbers are relative to the mean. Generally, the higher the z-score, the better. A z-score of 4 for Home Runs is definitely someone I’d love to have on my team. I calculated z-scores for all of the scoring categories, multipled Strikeouts by -1 so they were all on the same scale (we want fewer Strikeouts), and then I summed them all to get an overall z-score (called tot_z), that tells me who is above average among all relevant scoring categories.</p>
+<p>(This is a similar standardization I used to compare correlations with WAR in the first post. Same calculation, with a different intention.)</p>
+<p>So now let’s look at our top players.</p>
+</div>
+<div id="whos-on-top" class="section level4">
+<h4>Who’s on top?</h4>
+<pre class="r"><code>bat_z %&gt;% 
+  top_n(., 10, tot_z) %&gt;% 
+  arrange(desc(tot_z)) %&gt;% 
+  select(position, Name, R, HR, RBI, SO, SB, OPS, WAR, tot_z) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+<th align="right">OPS</th>
+<th align="right">WAR</th>
+<th align="right">tot_z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Mike Trout</td>
+<td align="right">114</td>
+<td align="right">39</td>
+<td align="right">105</td>
+<td align="right">131</td>
+<td align="right">22</td>
+<td align="right">1.027</td>
+<td align="right">8.2</td>
+<td align="right">11.889</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Giancarlo Stanton</td>
+<td align="right">109</td>
+<td align="right">58</td>
+<td align="right">140</td>
+<td align="right">171</td>
+<td align="right">2</td>
+<td align="right">1.029</td>
+<td align="right">6.4</td>
+<td align="right">11.869</td>
+</tr>
+<tr class="odd">
+<td align="left">third_base</td>
+<td align="left">Nolan Arenado</td>
+<td align="right">97</td>
+<td align="right">39</td>
+<td align="right">118</td>
+<td align="right">101</td>
+<td align="right">3</td>
+<td align="right">0.937</td>
+<td align="right">5.0</td>
+<td align="right">8.766</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Bryce Harper</td>
+<td align="right">100</td>
+<td align="right">35</td>
+<td align="right">102</td>
+<td align="right">122</td>
+<td align="right">10</td>
+<td align="right">0.984</td>
+<td align="right">5.6</td>
+<td align="right">8.646</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Anthony Rizzo</td>
+<td align="right">97</td>
+<td align="right">34</td>
+<td align="right">107</td>
+<td align="right">98</td>
+<td align="right">9</td>
+<td align="right">0.927</td>
+<td align="right">4.7</td>
+<td align="right">8.343</td>
+</tr>
+<tr class="even">
+<td align="left">outfield</td>
+<td align="left">Mookie Betts</td>
+<td align="right">100</td>
+<td align="right">24</td>
+<td align="right">90</td>
+<td align="right">73</td>
+<td align="right">23</td>
+<td align="right">0.871</td>
+<td align="right">5.6</td>
+<td align="right">8.184</td>
+</tr>
+<tr class="odd">
+<td align="left">first_base</td>
+<td align="left">Paul Goldschmidt</td>
+<td align="right">101</td>
+<td align="right">31</td>
+<td align="right">103</td>
+<td align="right">147</td>
+<td align="right">17</td>
+<td align="right">0.927</td>
+<td align="right">4.3</td>
+<td align="right">7.618</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Jose Altuve</td>
+<td align="right">94</td>
+<td align="right">20</td>
+<td align="right">82</td>
+<td align="right">73</td>
+<td align="right">28</td>
+<td align="right">0.859</td>
+<td align="right">4.8</td>
+<td align="right">7.434</td>
+</tr>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Carlos Correa</td>
+<td align="right">96</td>
+<td align="right">30</td>
+<td align="right">113</td>
+<td align="right">121</td>
+<td align="right">8</td>
+<td align="right">0.894</td>
+<td align="right">6.1</td>
+<td align="right">6.873</td>
+</tr>
+<tr class="even">
+<td align="left">first_base</td>
+<td align="left">Cody Bellinger</td>
+<td align="right">91</td>
+<td align="right">39</td>
+<td align="right">110</td>
+<td align="right">159</td>
+<td align="right">13</td>
+<td align="right">0.882</td>
+<td align="right">3.6</td>
+<td align="right">6.782</td>
+</tr>
+<tr class="odd">
+<td align="left">outfield</td>
+<td align="left">Cody Bellinger</td>
+<td align="right">91</td>
+<td align="right">39</td>
+<td align="right">110</td>
+<td align="right">159</td>
+<td align="right">13</td>
+<td align="right">0.882</td>
+<td align="right">3.6</td>
+<td align="right">6.782</td>
+</tr>
+</tbody>
+</table>
+<p>Trout’s on top, not surprisingly.</p>
+<br/> </br>
+<center>
+<img src="https://media.giphy.com/media/69jvQP1nAJcuDHXOY2/giphy.gif", style="width:450px;"></img>
+</center>
+<p><br/><br/></p>
+<p>There is considerable overlap between this list of names and players with high projected WAR, but now this list accounts for projected stolen bases, and projected strikeouts. This is much easier to keep track of in the moment.</p>
+<p>Forgive the digression again, but I’m still beating myself up about Buster Posey.</p>
+<center>
+<img src="https://media.giphy.com/media/FTu9FexqezV9C/giphy.gif", style="width:450px;"></img>
+</center>
+<p><br/><br/></p>
+<p>Going back to the question about positional talent, would I have had a different pool of talent to choose from if I’d looked at z-scores instead of WAR?</p>
+<pre class="r"><code>bat_z %&gt;% 
+  filter(position == &#39;catcher&#39;) %&gt;% 
+  top_n(., 10, tot_z) %&gt;% 
+  arrange(desc(tot_z)) %&gt;% 
+  select(position, Name, R, HR, RBI, SO, SB, OPS, WAR, tot_z) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+<th align="right">OPS</th>
+<th align="right">WAR</th>
+<th align="right">tot_z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Gary Sanchez</td>
+<td align="right">72</td>
+<td align="right">31</td>
+<td align="right">90</td>
+<td align="right">115</td>
+<td align="right">3</td>
+<td align="right">0.842</td>
+<td align="right">3.5</td>
+<td align="right">3.259</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">Evan Gattis</td>
+<td align="right">71</td>
+<td align="right">30</td>
+<td align="right">94</td>
+<td align="right">118</td>
+<td align="right">1</td>
+<td align="right">0.790</td>
+<td align="right">1.6</td>
+<td align="right">2.198</td>
+</tr>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Buster Posey</td>
+<td align="right">64</td>
+<td align="right">14</td>
+<td align="right">69</td>
+<td align="right">62</td>
+<td align="right">4</td>
+<td align="right">0.821</td>
+<td align="right">4.5</td>
+<td align="right">1.206</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">Willson Contreras</td>
+<td align="right">66</td>
+<td align="right">20</td>
+<td align="right">77</td>
+<td align="right">116</td>
+<td align="right">6</td>
+<td align="right">0.800</td>
+<td align="right">3.0</td>
+<td align="right">0.773</td>
+</tr>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Salvador Perez</td>
+<td align="right">59</td>
+<td align="right">23</td>
+<td align="right">74</td>
+<td align="right">99</td>
+<td align="right">1</td>
+<td align="right">0.752</td>
+<td align="right">2.8</td>
+<td align="right">-0.272</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">Brian McCann</td>
+<td align="right">54</td>
+<td align="right">20</td>
+<td align="right">66</td>
+<td align="right">81</td>
+<td align="right">1</td>
+<td align="right">0.752</td>
+<td align="right">2.3</td>
+<td align="right">-0.773</td>
+</tr>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Jonathan Lucroy</td>
+<td align="right">53</td>
+<td align="right">11</td>
+<td align="right">56</td>
+<td align="right">63</td>
+<td align="right">2</td>
+<td align="right">0.794</td>
+<td align="right">2.9</td>
+<td align="right">-1.074</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">Yadier Molina</td>
+<td align="right">54</td>
+<td align="right">12</td>
+<td align="right">67</td>
+<td align="right">73</td>
+<td align="right">6</td>
+<td align="right">0.724</td>
+<td align="right">2.5</td>
+<td align="right">-1.179</td>
+</tr>
+<tr class="odd">
+<td align="left">catcher</td>
+<td align="left">Wilson Ramos</td>
+<td align="right">49</td>
+<td align="right">20</td>
+<td align="right">67</td>
+<td align="right">83</td>
+<td align="right">1</td>
+<td align="right">0.739</td>
+<td align="right">2.1</td>
+<td align="right">-1.261</td>
+</tr>
+<tr class="even">
+<td align="left">catcher</td>
+<td align="left">J.T. Realmuto</td>
+<td align="right">57</td>
+<td align="right">13</td>
+<td align="right">55</td>
+<td align="right">91</td>
+<td align="right">8</td>
+<td align="right">0.742</td>
+<td align="right">2.5</td>
+<td align="right">-1.495</td>
+</tr>
+</tbody>
+</table>
+<p>In addition to Gary Sanchez, who I identified earlier, Gattis would have also been a good pick based on his projected homeruns and runs batted in. His WAR is quite low, which is why he didn’t end up on my radar before. Let’s look at shortstops, just for completeness.</p>
+<pre class="r"><code>bat_z %&gt;% 
+  filter(position == &#39;short&#39;) %&gt;% 
+  top_n(., 10, tot_z) %&gt;% 
+  arrange(desc(tot_z)) %&gt;% 
+  select(position, Name, R, HR, RBI, SO, SB, OPS, WAR, tot_z) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+<th align="right">OPS</th>
+<th align="right">WAR</th>
+<th align="right">tot_z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Carlos Correa</td>
+<td align="right">96</td>
+<td align="right">30</td>
+<td align="right">113</td>
+<td align="right">121</td>
+<td align="right">8</td>
+<td align="right">0.894</td>
+<td align="right">6.1</td>
+<td align="right">6.873</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Trea Turner</td>
+<td align="right">89</td>
+<td align="right">16</td>
+<td align="right">66</td>
+<td align="right">119</td>
+<td align="right">49</td>
+<td align="right">0.793</td>
+<td align="right">3.7</td>
+<td align="right">6.200</td>
+</tr>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Francisco Lindor</td>
+<td align="right">92</td>
+<td align="right">24</td>
+<td align="right">83</td>
+<td align="right">84</td>
+<td align="right">15</td>
+<td align="right">0.842</td>
+<td align="right">5.8</td>
+<td align="right">5.656</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Corey Seager</td>
+<td align="right">89</td>
+<td align="right">24</td>
+<td align="right">87</td>
+<td align="right">120</td>
+<td align="right">4</td>
+<td align="right">0.853</td>
+<td align="right">5.2</td>
+<td align="right">3.458</td>
+</tr>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Elvis Andrus</td>
+<td align="right">80</td>
+<td align="right">12</td>
+<td align="right">69</td>
+<td align="right">88</td>
+<td align="right">23</td>
+<td align="right">0.745</td>
+<td align="right">2.1</td>
+<td align="right">2.386</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Xander Bogaerts</td>
+<td align="right">86</td>
+<td align="right">15</td>
+<td align="right">75</td>
+<td align="right">110</td>
+<td align="right">11</td>
+<td align="right">0.789</td>
+<td align="right">3.4</td>
+<td align="right">1.904</td>
+</tr>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Trevor Story</td>
+<td align="right">82</td>
+<td align="right">30</td>
+<td align="right">93</td>
+<td align="right">203</td>
+<td align="right">11</td>
+<td align="right">0.791</td>
+<td align="right">1.9</td>
+<td align="right">1.586</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Ian Desmond</td>
+<td align="right">69</td>
+<td align="right">20</td>
+<td align="right">74</td>
+<td align="right">128</td>
+<td align="right">16</td>
+<td align="right">0.781</td>
+<td align="right">0.5</td>
+<td align="right">1.402</td>
+</tr>
+<tr class="odd">
+<td align="left">short</td>
+<td align="left">Didi Gregorius</td>
+<td align="right">72</td>
+<td align="right">21</td>
+<td align="right">80</td>
+<td align="right">83</td>
+<td align="right">5</td>
+<td align="right">0.743</td>
+<td align="right">2.6</td>
+<td align="right">1.375</td>
+</tr>
+<tr class="even">
+<td align="left">short</td>
+<td align="left">Jean Segura</td>
+<td align="right">77</td>
+<td align="right">13</td>
+<td align="right">56</td>
+<td align="right">93</td>
+<td align="right">23</td>
+<td align="right">0.720</td>
+<td align="right">2.0</td>
+<td align="right">1.175</td>
+</tr>
+</tbody>
+</table>
+<p>Simmons isn’t even on the list! Ouch. Given who was available by the fourth round, I maintain that Bogaerts might have been a fine pick (identified based on projected WAR in the last post) but it looks like Andrus might have also been helpful for his projected stolen bases and low projection for strikeouts.</p>
+<p>Let’s look at my second base pick, since prior analysis determined that it was also a position with scarce offensive talent.</p>
+<pre class="r"><code>bat_z %&gt;% 
+  filter(position == &#39;second_base&#39;) %&gt;% 
+  top_n(., 10, tot_z) %&gt;% 
+  arrange(desc(tot_z)) %&gt;%
+  select(position, Name, R, HR, RBI, SO, SB, OPS, WAR, tot_z) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">position</th>
+<th align="left">Name</th>
+<th align="right">R</th>
+<th align="right">HR</th>
+<th align="right">RBI</th>
+<th align="right">SO</th>
+<th align="right">SB</th>
+<th align="right">OPS</th>
+<th align="right">WAR</th>
+<th align="right">tot_z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Jose Altuve</td>
+<td align="right">94</td>
+<td align="right">20</td>
+<td align="right">82</td>
+<td align="right">73</td>
+<td align="right">28</td>
+<td align="right">0.859</td>
+<td align="right">4.8</td>
+<td align="right">7.434</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Jose Ramirez</td>
+<td align="right">92</td>
+<td align="right">21</td>
+<td align="right">84</td>
+<td align="right">67</td>
+<td align="right">20</td>
+<td align="right">0.849</td>
+<td align="right">4.8</td>
+<td align="right">6.574</td>
+</tr>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Brian Dozier</td>
+<td align="right">96</td>
+<td align="right">30</td>
+<td align="right">84</td>
+<td align="right">132</td>
+<td align="right">14</td>
+<td align="right">0.825</td>
+<td align="right">3.7</td>
+<td align="right">4.856</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Daniel Murphy</td>
+<td align="right">80</td>
+<td align="right">19</td>
+<td align="right">87</td>
+<td align="right">70</td>
+<td align="right">4</td>
+<td align="right">0.859</td>
+<td align="right">2.7</td>
+<td align="right">3.903</td>
+</tr>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Rougned Odor</td>
+<td align="right">85</td>
+<td align="right">31</td>
+<td align="right">92</td>
+<td align="right">139</td>
+<td align="right">14</td>
+<td align="right">0.776</td>
+<td align="right">1.7</td>
+<td align="right">3.809</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Jonathan Schoop</td>
+<td align="right">82</td>
+<td align="right">31</td>
+<td align="right">98</td>
+<td align="right">137</td>
+<td align="right">2</td>
+<td align="right">0.793</td>
+<td align="right">3.0</td>
+<td align="right">2.766</td>
+</tr>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Robinson Cano</td>
+<td align="right">78</td>
+<td align="right">23</td>
+<td align="right">88</td>
+<td align="right">91</td>
+<td align="right">2</td>
+<td align="right">0.795</td>
+<td align="right">2.9</td>
+<td align="right">2.501</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Ian Happ</td>
+<td align="right">75</td>
+<td align="right">27</td>
+<td align="right">82</td>
+<td align="right">157</td>
+<td align="right">11</td>
+<td align="right">0.798</td>
+<td align="right">2.1</td>
+<td align="right">1.726</td>
+</tr>
+<tr class="odd">
+<td align="left">second_base</td>
+<td align="left">Dee Gordon</td>
+<td align="right">78</td>
+<td align="right">4</td>
+<td align="right">39</td>
+<td align="right">91</td>
+<td align="right">46</td>
+<td align="right">0.674</td>
+<td align="right">1.9</td>
+<td align="right">1.598</td>
+</tr>
+<tr class="even">
+<td align="left">second_base</td>
+<td align="left">Whit Merrifield</td>
+<td align="right">74</td>
+<td align="right">12</td>
+<td align="right">61</td>
+<td align="right">97</td>
+<td align="right">25</td>
+<td align="right">0.732</td>
+<td align="right">2.1</td>
+<td align="right">1.441</td>
+</tr>
+</tbody>
+</table>
+<p>Given that no one who ranked above him was available in my league by the eighth round, Odor seems to be a reasonable pick.</p>
+<p>Alright, so now that I’m satisfied knowing that using z-scores would have changed my picks for catcher and shortstop, I’m going to look at z-scores for the rest of my draft picks.</p>
+</div>
+<div id="my-draft-picks" class="section level4">
+<h4>My draft picks</h4>
+<p>Clearly, using projected z-scores instead of projected WAR would have resulted in different draft picks. Let’s look at the z-scores for the players I did end up drafting. I added in information on draft order as well. For reference, I named my team “Dropped Third Strike”, after the <a href="https://sabr.org/research/dropped-third-strike-life-and-times-rule">obscure baseball rule</a>, so I’ve shortened it here to DTS for naming purposes.</p>
+<pre class="r"><code>DTS_bat &lt;- as.data.frame(cbind(c(&quot;Mookie Betts&quot;, &quot;Buster Posey&quot;, &quot;Andrelton Simmons&quot;, &quot;Edwin Encarnacion&quot;, &quot;Rougned Odor&quot;, &quot;Mike Moustakas&quot;, &quot;Adam Jones&quot;, &quot;Manuel Margot&quot;, &quot;Brandon Crawford&quot;, &quot;Max Kepler&quot;, &quot;Brandon Belt&quot;, &quot;Stephen Piscotty&quot;, &quot;Maikel Franco&quot;, &quot;Jose Peraza&quot;), c(01, 02, 04, 05, 08, 11, 12, 13, 18, 20, 21, 23, 24, 25)))
+names(DTS_bat) &lt;- c(&quot;Name&quot;, &quot;draft_order&quot;)
+
+drafted &lt;- inner_join(DTS_bat, bat_z, by = &quot;Name&quot;) 
+drafted %&gt;%
+  select(Name, draft_order, position, tot_z) %&gt;%
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Name</th>
+<th align="left">draft_order</th>
+<th align="left">position</th>
+<th align="right">tot_z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mookie Betts</td>
+<td align="left">1</td>
+<td align="left">outfield</td>
+<td align="right">8.184</td>
+</tr>
+<tr class="even">
+<td align="left">Buster Posey</td>
+<td align="left">2</td>
+<td align="left">catcher</td>
+<td align="right">1.206</td>
+</tr>
+<tr class="odd">
+<td align="left">Andrelton Simmons</td>
+<td align="left">4</td>
+<td align="left">short</td>
+<td align="right">0.550</td>
+</tr>
+<tr class="even">
+<td align="left">Edwin Encarnacion</td>
+<td align="left">5</td>
+<td align="left">first_base</td>
+<td align="right">5.724</td>
+</tr>
+<tr class="odd">
+<td align="left">Rougned Odor</td>
+<td align="left">8</td>
+<td align="left">second_base</td>
+<td align="right">3.809</td>
+</tr>
+<tr class="even">
+<td align="left">Mike Moustakas</td>
+<td align="left">11</td>
+<td align="left">third_base</td>
+<td align="right">2.995</td>
+</tr>
+<tr class="odd">
+<td align="left">Adam Jones</td>
+<td align="left">12</td>
+<td align="left">outfield</td>
+<td align="right">2.180</td>
+</tr>
+<tr class="even">
+<td align="left">Manuel Margot</td>
+<td align="left">13</td>
+<td align="left">outfield</td>
+<td align="right">-0.563</td>
+</tr>
+<tr class="odd">
+<td align="left">Brandon Crawford</td>
+<td align="left">18</td>
+<td align="left">short</td>
+<td align="right">-0.540</td>
+</tr>
+<tr class="even">
+<td align="left">Max Kepler</td>
+<td align="left">20</td>
+<td align="left">outfield</td>
+<td align="right">0.394</td>
+</tr>
+<tr class="odd">
+<td align="left">Brandon Belt</td>
+<td align="left">21</td>
+<td align="left">first_base</td>
+<td align="right">1.091</td>
+</tr>
+<tr class="even">
+<td align="left">Stephen Piscotty</td>
+<td align="left">23</td>
+<td align="left">outfield</td>
+<td align="right">-0.617</td>
+</tr>
+<tr class="odd">
+<td align="left">Maikel Franco</td>
+<td align="left">24</td>
+<td align="left">third_base</td>
+<td align="right">1.819</td>
+</tr>
+<tr class="even">
+<td align="left">Jose Peraza</td>
+<td align="left">25</td>
+<td align="left">second_base</td>
+<td align="right">-0.552</td>
+</tr>
+<tr class="odd">
+<td align="left">Jose Peraza</td>
+<td align="left">25</td>
+<td align="left">short</td>
+<td align="right">-0.552</td>
+</tr>
+</tbody>
+</table>
+<p>I ended up drafting four batters with negative projected z-scores: Margot, Crawford, Piscotty, and Peraza. Ouch! And fandom bias strikes again, because I ended up with three Giants, and one player from every other team. I already mentioned that Buster Posey was not the best pick at the catcher’s position, but I also ended up picking up Crawford, who had mediocre to bad projected z-scores for many scoring categories. This was a bad pick, and I ended up dropping him early in the season.</p>
+<div class="figure">
+<img src="https://media.giphy.com/media/lloFKP79zGtY4/giphy.gif" />
+
+</div>
+<p><br> </br></p>
+</div>
+</div>
+<div id="up-next" class="section level3">
+<h3>Up Next</h3>
+<p>In the <a href="/../portfolio/drafting-batters-part-4">next</a> post, I’ll wrap this up and look at how my players actually did, comparing the projection to the final 2018 data. Which players were truly bad picks? Who outperformed their projection? Stay tuned!</p>
+</div>

@@ -1,0 +1,126 @@
+---
+title: Drafting Batters in Fantasy Baseball, Part 2
+author: Angeline Protacio
+date: '2018-11-29'
+weight: 2
+slug: drafting-batters-part-2
+categories: []
+output:
+  blogdown::html_page:
+    toc: true 
+tags:
+  - R
+  - baseball
+  - fantasy
+  - ggplot2
+  - positional talent
+description: "Who drafts catchers in the second round, anyway?"
+image: "img/portfolio/canals.jpg"
+---
+<br>
+</br>
+
+###So where are we now?
+If you're reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading [this](/../portfolio/drafting-batters-part-1) first. 
+<br>
+</br>
+In the previous post, I wrote about my draft strategy using WAR, and how I selected Posey, a catcher, in the second round, and Simmons, a shortstop, in the fourth round. In this post, I go a little deeper into those two decisions, and I explore fantasy talent by defensive position. 
+
+###Other Considerations: Positions for Feast or Famine
+One of the reasons I chose to draft Posey and Simmons in the early rounds is because my baseball intuition tells me that strong offensive catchers and shortstops are in short supply. Because of this, I wanted to fill those positions right away. I looked into whether the data bears that out, and these plots suggest that my intuition was correct. Let's look at them one by one.
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(purrr)
+library(wesanderson)
+source("../R/load_data.R")
+
+pos_files <- c("../data/post1/depth_1B.csv", "../data/post1/depth_2b.csv", "../data/post1/depth_3b.csv", "../data/post1/depth_SS.csv", "../data/post1/depth_OF.csv", "../data/post1/depth_C.csv")
+pos_names <- c("first_base", "second_base", "third_base", "short", "outfield", "catcher")
+batters <- map2_df(pos_files, pos_names, load_data) %>%
+  select(Name, Team, playerid, position, PA, R, HR, RBI, SB, OPS, SO, WAR)
+```
+
+```{r positional home-runs}
+
+ggplot(batters, aes(position, HR, fill = position)) + 
+  geom_violin() + 
+  scale_fill_manual(values = wes_palette("FantasticFox1", 6, type = "continuous")) +
+  theme_bw() + 
+  theme(legend.position="none") + 
+  scale_y_continuous(limits = c(0, 60), expand = c(0, 0))
+```
+
+This is a violin plot. The width of each column indicates how many players there are for that position, projected to hit the number of home runs indicated on the y-axis. There appear to be a lot of catchers that are projected to hit 5 homeruns or fewer (wider in that area), and not too many catchers projected to hit 25+ home runs (narrower at the top). Shortstops and second basemen also seem to have a similar distribution, though less extreme. They are projected to hit more home runs than catchers overall, but not nearly as many as those playing first base, third base, or outfield positions. 
+
+```{r positional runs}
+ggplot(batters, aes(position, R, fill = position)) + 
+  geom_violin() + 
+  scale_fill_manual(values = wes_palette("FantasticFox1", 6, type = "continuous")) +
+  theme_bw() + 
+  theme(legend.position="none") + 
+  scale_y_continuous(limits = c(0, 125), expand = c(0, 0))
+```
+
+Now looking at runs, we see that catchers are still bringing up the rear. The differences between the other positions shrinks a little, but we still see that a few star outfielders are projected to score more runs than any other position. Second basemen and shortstops are still projected to score fewer runs than outfielders, first basemen, and third basemen.
+
+
+```{r positional RBI}
+ggplot(batters, aes(position, RBI, fill = position)) + 
+  geom_violin() + 
+  scale_fill_manual(values = wes_palette("FantasticFox1", 6, type = "continuous")) +
+  theme_bw() + 
+  theme(legend.position="none") + 
+  scale_y_continuous(limits = c(0, 150), expand = c(0, 0))
+```
+
+Finally, let's look at RBIs. We see again that catchers are really not pulling their weight, and that a few star outfielders are going to bring in a whole lot of runs. Second basemen are not projected to bring in as many runs, but first basemen, shortstops, and third basemen all seem to be pretty close. 
+
+In summary, it looks like a lot of offense lies with outfielders, first basemen, and third basemen, whereas catchers, shortstops and second basemen seem to be weaker offensive players. My intuition was right on about the shortage of offense in those positions. However, perhaps drafting from stronger offensive positions in the early rounds would make sense too. After drafting Betts (OF), my next outfielder was in round 12. I left a lot of offense on the table. But I digress.
+
+Let's go back to the idea of drafting from positions with a shortage of offense. From a scarcity point of view, it makes sense, since every team needs to have at least one catcher and one shortstop. Given that, maybe it was reasonable that I ended up with Posey and Simmons. It's unfair to compare catchers and shortstops to outfielders I could have picked up in the early stages. Maybe Posey and Simmons represent the best offensive talent at their position, given what was available at the time. 
+
+<center>
+<img src="https://media.giphy.com/media/oKdjMdWXl9ys8/giphy.gif", style="width:300px;"></img>
+</center>
+<br/><br/> 
+
+###But were they, though?
+
+So this is where I start to beat myself up a little bit. Did I really make the best decision at the time, given my logic? Now that I'm able to take my time and reflect, I know that WAR isn't a great way to select players. But given what I knew, was it reasonable to pick Posey as a catcher in the second round?
+
+Let's look at all the other catchers with high WAR, and see who else comes up.
+```{r catch_runs, warning = FALSE}
+batters %>% 
+  filter(position == 'catcher' & WAR > 3) %>%
+  select(Name, position, R, HR, RBI, OPS, SO, SB) %>%
+  knitr::kable()
+```
+
+Even using WAR as a metric to guide decisions, I might have been better off picking up Gary Sanchez for his overall projected offensive numbers. His strikeouts are a problem, but I could take wins in three categories for a loss in one. He was available at this point in the draft, but I chose Posey instead.
+
+<center>
+<img src="https://media.giphy.com/media/gnJgBlPgHtcnS/giphy.gif", style="width:300px;"></img>
+</center>
+<br/><br/> 
+
+What about for shortstops?
+```{r short_runs}
+batters %>% 
+  filter(position == 'short' & WAR > 3) %>%
+  select(Name, position, R, HR, RBI, OPS, SO, SB) %>%
+  knitr::kable()
+```
+
+Correa, Seager, Lindor and Turner would have all been excellent picks over Simmons. They were all drafted before I had my pick in the fourth round, though, which would have left me with Bogaerts. Based on the projections, he and Simmons were not that different, so I suppose this wasn't a totally poor choice. The other two, Cozart and Crawford, weren't really upgrades, either.
+
+So, given what I knew at the time, Simmons was not a bad pick. Posey, however, was not the smartest choice. As a Giants fan playing her first season of Fantasy Baseball, it would have killed me a little inside if someone else had picked him up before I did. My fandom caused me to make a bad decision in the second round of the draft. It's a good reminder that fandom doesn't necessarily win Fantasy Baseball.
+
+<center>
+<img src="https://media.giphy.com/media/3o6Zt1TrXW8uW2lE2I/giphy.gif", style="width:300px;"></img>
+</center>
+
+<br></br>
+
+###Up Next
+In the [next](/../portfolio/drafting-batters-part-3) post, I'll discuss another strategy that may have been a little less stressful, and more geared toward my specific league goals. Stay tuned!
