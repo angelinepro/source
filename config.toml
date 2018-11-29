@@ -35,7 +35,7 @@ publishDir = "../angelinepro.github.io"
 
   # Nav links in the side bar
  [[params.navlinks]]
- name = "home"
+ name = "about"
   url = "about/"
 
   [[params.navlinks]]
