@@ -5,6 +5,8 @@ title = "publications"
 
 <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief107.pdf">Mental Health Emergency Department Visits among New York City Adults, 2015. </a> New York Department of Health and Mental Hygiene Epi Data Brief. 2018 November.
 
+Terry MB, Cohn BA, Goldberg M, Flom JD, Wei Y, Houghton LC, Tehranifar P, McDonald JA, <b>Protacio A</b>, Cirillo P, Michels KB. <a href="https://www.ncbi.nlm.nih.gov/pubmed/30383202">Do Birthweight and Weight Gain During Infancy and Early Childhood Explain Variation in Mammographic Density in Women in Midlife? Results From Cohort and Sibling Analyses. </a> American Journal of Epidemiology. 2018 November 01. 
+
 Tang E, <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief101.pdf">Suicides among females in New York City, 2006 to 2015. </a>New York City Department of Health and Mental Hygiene Epi Data Brief. 2018 May.
 
 Terry MB, Keegan THM, Houghton LC, Goldberg M, Andrulis IL, Daly MB, Buys SS, Wei Y, Whittemore
