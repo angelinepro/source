@@ -14,13 +14,13 @@ tags:
   - fantasy
   - ggplot2
   - WAR
-description: "Does this baseball-loving data nerd have a shot at winning her Fantasy Baseball league?"
+description: "My very stressful and questionable fantasy baseball draft strategy"
 image: "img/portfolio/hyacinth.jpg"
 ---
 
-###My first season in Fantasy Baseball
+###My first season in fantasy baseball
 
-I joined an ESPN Fantasy Baseball League for the first time this year, which may come as a shock to those of you who know that I love both baseball and data. I was in an ESPN Fantasy Basketball League a few years ago, but because I haven't watched basketball seriously in about 15 years, these were two very unsatisfying seasons. I was hoping it would encourage me to watch more basketball, but instead I made zero moves, stubbornly refused to trade Kevin Durant, and effectively set my league fees on fire. 
+I joined a fantasy baseball league for the first time this year, which may come as a shock to those of you who know that I love both baseball and data. I was in a fantasy basketball league a few years ago, but because I haven't watched basketball seriously in about 15 years, these were two very unsatisfying seasons. I was hoping it would encourage me to watch more basketball, but instead I made zero moves, stubbornly refused to trade Kevin Durant, and effectively set my league fees on fire. 
 
 ![](https://media.giphy.com/media/5aoTMpLEIxlfi/giphy.gif)
 
@@ -28,11 +28,11 @@ Unsurprisingly, this strategy did not help me win.
 
 Finally, this year, a friend invited me to join his newly founded fantasy baseball league. The fees were a bit steep ($50), and I didn't really make much progress in my prior fantasy leagues, but I decided to join up anyway. I actually watch baseball, and this seemed like a better incentive to learn how to play fantasy sports. So I signed up, with a vague sense that I was about to go down the [rabbit hole](https://media.giphy.com/media/4BgQaxfQfeqys/giphy.gif).
 
-There are a lot of parts to Fantasy Baseball, so I'm going to break this up into several posts. This series will focus on batters. I'm going to start this post with a brief introduction to Fantasy Baseball (geared toward those with little to no experience, and a limited understanding of baseball), this year's draft strategy for batters, and reflections on the metrics I used. The second post will dive a little deeper into positional talent, and how that relates to the metrics I used. The third post will detail an alternate draft strategy, where I beat myself up about the drafting decisions I made. In each post, I included the R code I used to explore the player data and to develop a draft strategy, in case you are interested in implementing some of this analysis on your own.
+There are a lot of parts to Fantasy Baseball, so I'm going to break this up into several posts. This series will focus on batters. I'm going to start this post with a brief introduction to Fantasy Baseball (geared toward those with little to no experience, and a limited understanding of baseball), this year's draft strategy for batters, and reflections on the metrics I used. The second post will dive a little deeper into positional talent, and how that relates to the metrics I used. The third post will detail an alternate draft strategy, where I beat myself up about the drafting decisions I made. In the fourth post, I'll look at the success of the team I drafted, and what I could have done differently. In each post, I included the R code I used to explore the player data and to develop a draft strategy, in case you are interested in implementing some of this analysis on your own. It's also in my [github repo](https://github.com/angelinepro/source/tree/master/content).
 
-I wrote this article because my initial search for fantasy baseball strategies returned many articles written for people with substantial prior fantasy sports experience. I wanted a reference for someone without significant experience in fantasy sports, that could be implemented by someone with a surface level understanding of baseball and minimal statistics knowledge. I decided to write the guide I wanted to read before this all began. Let's begin.
+I wrote this post because my initial search for fantasy baseball strategies returned many articles written for people with substantial prior fantasy sports experience. I wanted a reference for someone without significant experience in fantasy sports, that could be implemented by someone with a surface level understanding of baseball and minimal statistics knowledge. I decided to write the guide I wanted to read before this all began. Let's begin.
 
-###What is Fantasy Baseball?
+###What is fantasy baseball?
 Fantasy leagues are made up of several teams competing against each other to win certain scoring categories. For those who have never played any fantasy sports, I'll use my league as an example. 
 
 My league uses the following scoring categories: 
@@ -54,9 +54,9 @@ Each week, my team plays against an opponent. If my team scores 20 runs that wee
 
 Before play begins, however, there is a league draft.
 
-### The Draft
+### The draft
 
-In the draft, each team takes turns drafting players to fill their available positions. For batting, there are a total of thirteen slots, comprising eight fielding positions (catcher, first base, second base, short stop, third base, and left, center, and right field), plus two utility players (any position). For pitching, there are a total of fourteen slots, comprising three starting pitchers, three relief pitchers, and then four for either starters or relievers. There are seven spots available for bench players, which can be divided up between batters and pitchers as you wish. I'll discuss pitching in another post, but my drafted batters looked like this:
+In the draft, each team takes turns drafting players to fill their available positions. For batting, there are a total of thirteen slots, comprising eight fielding positions (catcher, first base, second base, shortstop, third base, and left, center, and right field), plus two utility players (any position). There are also fourteen slots for pitchers. Seven slots are available for bench players, which can be divided up between batters and pitchers as you wish. I'll discuss pitching in another post, but my drafted batters looked like this:
 
 | Position     | Name |
 | ------------- |------------|
@@ -76,18 +76,19 @@ In the draft, each team takes turns drafting players to fill their available pos
 | Bench | Manuel Margot (OF) |
 
 
-Once these players are drafted, they are on your team, but throughout the course of the season, you can drop players who aren't contributing, add free agents who aren't currently on a team, and trade with other teams for players you want. There is figurative cash involved with adding free agents to your team, which I'll discuss in another post.
+Drafted players are now on your team, but you can drop players who aren't contributing, and add free agents who aren't currently on a team throughout the season. You can also trade with other teams for players you want, up until the trade deadline.
 
-The draft is important because this may be the only opportunity to pick up high performing players. Players like Mike Trout, or Mookie Betts, for instance, are unlikely to be dropped once they're drafted, barring injury or disaster. It's important to go into the draft with a strategy, or at least, some idea of how you want to select players. I'd previously spent maybe two hours preparing for my Fantasy Basketball drafts, so I thought this time, I'd devote an afternoon to it. This was not enough time, in hindsight.
+The draft is important because this may be the only opportunity to pick up high performing players. Players like Mike Trout, or Mookie Betts, for instance, are unlikely to be dropped or traded, barring injury or disaster. It's important to go into the draft with a strategy, or at least, some idea of how you want to select players. I'd previously spent maybe two hours preparing for my Fantasy Basketball drafts, so I thought this time, I'd devote an afternoon to it. This was not enough time, in hindsight.
 
 ![](https://media.giphy.com/media/3o7TKpWMuZga6QURwI/giphy.gif)
 <br/><br/> 
 
-### How I Prepared for the Draft
+### How I prepared for the draft
 
-I downloaded player projection data from Fangraphs. The projection data is a prediction of how a player will perform, based on historical numbers. Each of the projection systems differs a bit, but the one I used was the [ZIPS projection](https://www.fangraphs.com/projections.aspx?pos=all&stats=bat&type=rzips&team=0&lg=all&players=0), because it was the first projection system I found on Fangraphs. I only had an afternoon, after all! I exported data from the site for each of the batting positions. I saved them to a folder called "data" in my R Project directory, renamed the files for readability, and combined all of the data for each position into one data frame called "batters", with a variable called "position". I also removed all other categories that I deemed irrelevant for making draft decisions.
+I downloaded player projection data from [Fangraphs](https://www.fangraphs.com). The projection is a prediction of how a player will perform, based on historical numbers. Each of the projection systems differs a bit, but the one I used was the [ZIPS projection](https://www.fangraphs.com/projections.aspx?pos=all&stats=bat&type=rzips&team=0&lg=all&players=0), because it was the first projection system I found on Fangraphs (I only had an afternoon, after all). I exported data from the site for each of the batting positions. I saved them to a folder called "data" in my R Project directory, renamed the files for readability, and combined all of the data for each position into one data frame called "batters", with a variable called "position". I also removed all other categories that I deemed irrelevant for making draft decisions. You can see this in the code below.
 
-I'm loading in [dplyr](https://dplyr.tidyverse.org/) to facilitate data cleaning (and because I'm addicted to [pipes](https://media.giphy.com/media/UhZ4aTuiZeKha/giphy.gif)), [ggplot2](https://ggplot2.tidyverse.org/) for easy visualizations, and [purrr](https://purrr.tidyverse.org/) to simplify loading. I'm also loading in [wesanderson](https://github.com/karthik/wesanderson) to make my visualizations a little nicer to look at. I've written a function called load_data to minimize repetitive code. See the github repository for that code.
+
+For reference, I'm loading in [dplyr](https://dplyr.tidyverse.org/) to facilitate data cleaning (and because I'm addicted to [pipes](https://media.giphy.com/media/UhZ4aTuiZeKha/giphy.gif)), [ggplot2](https://ggplot2.tidyverse.org/) for easy visualizations, and [purrr](https://purrr.tidyverse.org/) to simplify loading. I'm also loading in [wesanderson](https://github.com/karthik/wesanderson) to make my visualizations a little nicer to look at. I've written a function called load_data to minimize repetitive code. See the [github repository](https://github.com/angelinepro/source/tree/master/content/R) for that code.
 
 
 ```{r read_data, message=FALSE, warning=FALSE}
@@ -105,12 +106,12 @@ batters <- map2_df(pos_files, pos_names, load_data) %>%
 ```
 <br/><br/> 
 
-### My Draft Strategy
+### My draft strategy
 An afternoon is not enough time to learn about how to play fantasy baseball and come up with a cohesive, overarching draft strategy. Instead, I did a few quick calculations to empower me to make decisions about whom to draft in the moment, based on what players are available, what positions they play, which scoring categories are strengths for my team, and what gaps remain. To help inform timely draft decisions, I planned to create rank variables for each of the scoring categories, putting each player into quantiles for each category. Six scoring categories is an awful lot to synthesize in the two minutes given to select a player, so I needed to also rank some statistic that accounts for all six scoring categories. Based on my limited research, I decided to use [WAR](https://www.fangraphs.com/library/misc/war/) (Wins Above Replacement). WAR is often used as a summary statistic to characterize a player's total contributions to their team.
 
-How WAR is calculated differs by source. I got my projected WAR data from Fangraphs, and their WAR is calculated using a combination of offensive, defensive, and base running statistics. WAR was already part of the data I downloaded from Fangraphs, so I thankfully didn't need to calculate a new statistic. Seems easy enough. However, all of my scoring categories are based on offensive statistics. WAR, while accounting for offensive statistics, also accounts for defense and base running, which are irrelevant to my scoring categories. Someone who has a high WAR may be excellent defensively, but may put up average offensive numbers. They may not help me win my scoring categories. I didn't take this into account when preparing for my draft, but it ended up coming back to bite me later on.
+How WAR is calculated differs by source. I got my projected WAR data from Fangraphs, which is calculated using a combination of offensive, defensive, and base running statistics. WAR was already part of the data I downloaded from Fangraphs, so I saved time not calculating a new statistic. However, all of my scoring categories are based on offensive statistics. WAR, while accounting for offensive statistics, also accounts for defense and base running, which are irrelevant to my scoring categories. Someone who has a high WAR may be excellent defensively, but may put up average offensive numbers. They may not help me win my scoring categories. I didn't take this into account when preparing for my draft, but it ended up coming back to bite me later on.
 
-####WAR, What is it Good For?
+####WAR, what is it good for?
 
 I looked at the distribution of projected WAR among all the players in the dataset, to understand how to split players into quantiles. I used a histogram to make sure the number of quantiles I wanted to split players into was large enough to capture the variance in WAR. If I split players up into too few quantiles, I might collapse exceptional players (WAR > 6) with reasonably good players (WAR = 3). If I split players into too many quantiles, I'll end up with one player in each, which is not helpful for making comparisons.
 
@@ -120,7 +121,7 @@ ggplot(batters, aes(x=WAR)) +
   theme_bw()
 ```
 
-Based on the distribution, and the quantity that seemed reasonable to examine at a time,  I decided to split batters up into quantiles of 50. My logic for this is that when choosing whom to draft, I'd be in good hands selecting any player in the top 2% of WAR. There were roughly 12-13 players in each quantile, which is enough to make comparisons across players. These players in the table below represent the top 2% of WAR. 
+Based on the distribution, and the quantity that seemed reasonable to examine at a time,  I decided to split batters up into quantiles of 50. My logic for this is that when choosing whom to draft, I'd be in good hands selecting any player in the top 2% of WAR. There were roughly 12-13 players in each quantile, which is enough to make comparisons across players. These players in the table below represent the top 2% in WAR. 
 
 ```{r WAR-order, warning=FALSE}
 batters$qt_WAR <- ntile(batters$WAR, 50)
@@ -131,7 +132,9 @@ batters %>%
   knitr::kable()
 ```
 
-Jose Ramirez appears twice because he's eligible to play two positions. I didn't clean any of the data up in that regard.
+Apologies to those on mobile, you may not be able to see all columns of these tables.
+
+Jose Ramirez appears twice because he's eligible to play two positions. This is helpful to know for drafting players, so I didn't bother to clean this up.
 
 I ended up selecting Mookie Betts in my first round, because in addition to a high WAR, he was projected to steal more bases (high SB), and strike out less often (low SO) than others in the top 2%. Nearly everyone else in this group was selected in the first round, so I needed to set my sights a little lower, the top 4%.
 
@@ -143,7 +146,7 @@ batters %>%
   knitr::kable()
 ```
 
-I picked Buster Posey as a second rounder for his high WAR, and his low number of strikeouts relative to everyone else in his group. Andrelton Simmons was my fourth rounder for the same reason, with more stolen bases.
+A lot of these players had also been drafted, but of the ones remaining, I picked Buster Posey in the second round for his high WAR, and his low number of strikeouts relative to everyone else in his group. Andrelton Simmons was my fourth round pick for a similar reason, with more stolen bases.
 
 Seems good so far, right? 
 
@@ -158,13 +161,15 @@ batters %>%
   knitr::kable()
 ```
 
-Picking these two in the second and fourth round, in hindsight, was not the best idea. In fact, it may not make sense to use WAR to differentiate between players in the early rounds because there is a high opportunity cost to missing out on strong offensive players that actually contribute to scoring categories. Sorry, Buster.
+Picking these two in the second and fourth round, in hindsight, was not the best idea. In fact, it may not make sense to use WAR to differentiate between players in the early rounds because there is a high opportunity cost to missing out on strong offensive players that actually contribute to my scoring categories. Sorry, Buster.
 
 ![](https://media.giphy.com/media/WeMQzWA2aiJuU/giphy.gif)
 <br/><br/>
 
-####WARning Signs
-I plotted a standardized version of each of the scoring categories against WAR. I standardized the scoring categories to simplify interpretation and visualization, since the range differs greatly across the scoring categories. 
+####WARning signs
+I decided to look at how each of the scoring categories related to projected WAR. To do that, I standardized the scoring categories to simplify interpretation and visualization, since the range differs greatly across the scoring categories. Then, I plotted the standardized version against projected WAR. 
+
+
 ```{r plot-WAR-categories}
 source("../R/z_score.R")
 
@@ -187,18 +192,17 @@ ggplot(batters %>%
   
 ```
 
-WAR doesn't correlate with all of the scoring categories. In fact, WAR doesn't seem to relate to stolen bases or strikeouts at all. 
+Looking at these plots, projected WAR seems to increase slightly with the first four scoring categories, but it doesn't seem to increase with stolen bases (SB_z), or strikeouts (SO_z) at all.
 
+####WAR is not the answer (good god, y'all)
+It looks like WAR isn't great for identifying players that would help win my scoring categories, and it's not at all related to stealing bases or striking out. I shouldn't rely on this overall summary category to guide my decisions. Instead, perhaps it'd be more useful to rank players based on their projected performance for each scoring category. The performance in the scoring categories is ultimately what matters, and what will decide whether my team wins the matchup that week.
 
-####WAR is Not the Answer (Good God, Y'all)
-It looks like WAR isn't great for identifying strong offensive players (the kind that would help win scoring categories), and it's not even related to stealing bases or striking out. I should perhaps not rely on an overall summary category to guide my decisions, and rank players based on their projected performance for each scoring category. The performance in the scoring categories is what matters, in the end.
-
-So I split players into quantiles by 50 again, and ranked each scoring category separately. This time, I filtered results to players who were in the top 4% of projections for runs, home runs, runs batted in, and on base plus slugging. I limited it to these four scoring categories because no player was in the top 4% for all six, and only Mike Trout was in the top 4% for these four categories plus base stealing. 
+At this point in the draft, I changed strategies, and split players into quantiles by 50 again, and ranked each scoring category separately. This time, I filtered results to players who were in the top 4% of projections for runs, home runs, runs batted in, and on base plus slugging. I limited it to these four scoring categories because no player was in the top 4% for all six, and only Mike Trout was in the top 4% for these four categories plus base stealing. 
 
 ![](https://media.giphy.com/media/YWoB4KtzoBDu39C6DQ/giphy.gif)
 
 
-While I'm sure it's useful to know how great Mike Trout is, I was picking sixth, so I had no chance of drafting him anyway. Nothing to see here.
+While I'm sure it's useful to know how great Mike Trout is, he was already picked up by some other team at this point. Nothing to see here.
 
 So which players are the cream of the crop for my four scoring categories?
 ```{r two-percent-categories}
@@ -216,20 +220,21 @@ batters %>%
   knitr::kable()
 ```
 
-This group is in the top 4% of projections for runs, home runs, runs batted in, and OPS. This would have been a solid group to start with. After my early draft picks based on WAR, I went with this strategy and loosened the filtering criteria as we got further along in the draft. I also made sure to occasionally select players who were projected to have more stolen bases and fewer strikeouts. This strategy requires a lot of analysis in the moment, which can lead to a very stressful three hour draft. 
+This group is in the top 4% of projections for runs, home runs, runs batted in, and OPS. This would have been a solid group to start with. I started seleting players based on this strategy and loosened the filtering criteria as we got further along in the draft. I also made sure to occasionally select players who were projected to have more stolen bases and fewer strikeouts. This strategy requires a lot of analysis in the moment, which can lead to a very stressful three hour draft. 
 
 ![](https://media.giphy.com/media/l1KVaj5UcbHwrBMqI/giphy.gif)
+
+
+In hindsight, I would have been better off spending more than an afternoon strategizing. I have regrets.
+
 <br/><br/> 
 
-###Up Next
-So what happened? Was the stress worth it? Did it end up being a reasonable draft strategy? I'll discuss that in the [third part][2] of this series. In the [next part][1], I'll explore positional talent. Nevermind that I drafted Buster Posey in the second round, but should I have drafted ANY catcher in the second round? Would I have been better off drafting a player from some other position? Which positions are preferable to select from in the early rounds? This will all be covered in the [next post][1]. Stay tuned!
+###Up next
+In the [next part][1], I'll explore positional talent as it relates to my draft decisions. Nevermind that I drafted Buster Posey in the second round, but should I have drafted ANY catcher in the second round? Would I have been better off drafting a player from some other position? Which positions are preferable to select from in the early rounds? This will all be covered in the [next post][1]. Stay tuned!
 
-![](https://media.giphy.com/media/l0HlBxMf5YHnBdQmk/giphy.gif)
+
 <br/><br/> 
 
 [Drafting Batters in Fantasy Baseball, Part 2][1]
 
-[Drafting Batters in Fantasy Baseball, Part 3][2]
-
 [1]: /../portfolio/drafting-batters-part-2
-[2]: /../portfolio/drafting-batters-part-3

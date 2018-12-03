@@ -14,29 +14,29 @@ tags:
   - fantasy
   - Z-scores
 image: "img/portfolio/tulip.jpg"
-description: "I never trusted WAR"
+description: "WAR: a poor choice"
 ---
 
 
 <div id="TOC">
 <ul>
-<li><a href="#okay-now-where-were-we">Okay, now where were we?</a></li>
-<li><a href="#there-is-another-way">There is another way!</a></li>
+<li><a href="#where-were-we">Where were we?</a></li>
+<li><a href="#a-better-strategy">A better strategy</a></li>
 <li><a href="#up-next">Up Next</a></li>
 </ul>
 </div>
 
-<div id="okay-now-where-were-we" class="section level3">
-<h3>Okay, now where were we?</h3>
-<p>If you’re reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading <a href="/../portfolio/drafting-batters-part-1">this</a> first. <br> </br> In the last two posts, I wrote about my draft strategy using projected WAR, and explored fantasy talent by defensive position. I discovered that <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement) was not a great way to select players given my league’s scoring categories. In the absence of a summary statistic to guide my decisions, I looked at all of the scoring categories. I was pretty frazzled by the end of the draft.</p>
+<div id="where-were-we" class="section level3">
+<h3>Where were we?</h3>
+<p>If you’re reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading <a href="/../portfolio/drafting-batters-part-1">this</a> first. <br> </br> In the last two posts, I wrote about <a href="/../portfolio/drafting-batters-part-1">my draft strategy using projected WAR</a>, and <a href="/../portfolio/drafting-batters-part-2">explored fantasy talent by defensive position</a>. I discovered that <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement) was not a great way to select players given my league’s scoring categories. In the absence of a summary statistic to guide my decisions, I looked at all of the scoring categories. I was pretty frazzled by the end of the draft.</p>
 <center>
 <img src="https://media.giphy.com/media/1jl173guBKkbvC03rQ/giphy.gif", style="width:450px;"></img>
 </center>
 <p><br/><br/></p>
 </div>
-<div id="there-is-another-way" class="section level3">
-<h3>There is another way!</h3>
-<p>In doing research for writing this blog post, I found this <a href="https://fantasysixpack.net/creating-fantasy-baseball-player-rater/">article</a> on setting up my own rankings based on my league scoring categories, using z-scores. It’s a simple statistic that identifies who is above the mean, and by how much. This is so simple, I was kicking myself for using it on draft day. Here’s how it works.</p>
+<div id="a-better-strategy" class="section level3">
+<h3>A better strategy</h3>
+<p>In doing research for this post, I found this <a href="https://fantasysixpack.net/creating-fantasy-baseball-player-rater/">article</a> on setting up my own rankings based on my league scoring categories, using z-scores. It’s a simple statistic that identifies what players are above the mean, and by how much. This is so simple, I was kicking myself for using it on draft day. Here’s how it works.</p>
 <div id="create-z-scores" class="section level4">
 <h4>Create Z-Scores</h4>
 <pre class="r"><code>bat_z &lt;- batters %&gt;%
@@ -49,9 +49,9 @@ description: "I never trusted WAR"
          SB_z = z_score(SB),
          OPS_z = z_score(OPS),
          tot_z = round((R_z + HR_z + RBI_z + SO_z + SB_z + OPS_z), 3))</code></pre>
-<p>I took the same batters dataset and filtered it just to include those with 300 or more plate appearances. Since I’m standardizing, I wanted to exclude players without sufficient playing time, who may have really low predicted runs, home runs, RBIs, strikeouts, or stolen bases just because of small samples. These players may also have extreme predicted OPS statistics (really high, or really low) because of small samples. I didn’t want to draft players who weren’t projected to play for most of the season, and 300 plate appearances is roughly two appearances per game. This effectively halved the batters in my dataset.</p>
-<p>Once I filtered based on that criteria, I calculated the mean and standard deviation for the remaining players, and used that to calculate a z-score, indicating how extreme (either positive or negative) that player’s numbers are relative to the mean. Generally, the higher the z-score, the better. A z-score of 4 for Home Runs is definitely someone I’d love to have on my team. I calculated z-scores for all of the scoring categories, multipled Strikeouts by -1 so they were all on the same scale (we want fewer Strikeouts), and then I summed them all to get an overall z-score (called tot_z), that tells me who is above average among all relevant scoring categories.</p>
-<p>(This is a similar standardization I used to compare correlations with WAR in the first post. Same calculation, with a different intention.)</p>
+<p>I took the same batters dataset and filtered it just to include those with 300 or more plate appearances. I wanted to exclude players without sufficient playing time, who may have really low predicted runs, home runs, RBIs, strikeouts, or stolen bases just because of small samples. These players may also have extreme predicted OPS statistics (really high, or really low) because of small samples. I didn’t want to draft players who weren’t projected to play for most of the season, and 300 plate appearances is roughly two appearances per game. This effectively halved the batters in my dataset.</p>
+<p>Once I filtered based on that criteria, I calculated the <a href="https://www.khanacademy.org/math/statistics-probability/summarizing-quantitative-data/mean-median-basics/a/mean-median-and-mode-review">mean</a> and <a href="https://www.khanacademy.org/math/probability/data-distributions-a1/summarizing-spread-distributions/a/introduction-to-standard-deviation">standard deviation</a> for the remaining players, and used that to calculate a z-score, indicating how extreme (either positive or negative) that player’s numbers are relative to the mean. Generally, the higher the z-score, the better. A z-score of 4 for home runs is definitely someone I’d love to have on my team. I calculated z-scores for all of the scoring categories, multiplied strikeouts by -1 so they were all on the same scale (we want fewer strikeouts), and then I summed them all to get an overall z-score (I named this variable “tot_z”). This overall z-score looks at all the scoring categories and lets me know how that player compares to others.</p>
+<p>(This is a similar calculation I used to compare the scoring categories with WAR in the first post. Same calculation, different intention.)</p>
 <p>So now let’s look at our top players.</p>
 </div>
 <div id="whos-on-top" class="section level4">
@@ -218,12 +218,12 @@ description: "I never trusted WAR"
 </center>
 <p><br/><br/></p>
 <p>There is considerable overlap between this list of names and players with high projected WAR, but now this list accounts for projected stolen bases, and projected strikeouts. This is much easier to keep track of in the moment.</p>
-<p>Forgive the digression again, but I’m still beating myself up about Buster Posey.</p>
+<p>Forgive the digression, but I’m still beating myself up about Buster Posey.</p>
 <center>
 <img src="https://media.giphy.com/media/FTu9FexqezV9C/giphy.gif", style="width:450px;"></img>
 </center>
 <p><br/><br/></p>
-<p>Going back to the question about positional talent, would I have had a different pool of talent to choose from if I’d looked at z-scores instead of WAR?</p>
+<p>Going back to the question I explored in the <a href="/../portfolio/drafting-batters-part-2">last post</a> about positional talent, would I have had a different pool of talent to choose from if I’d looked at z-scores instead of WAR?</p>
 <pre class="r"><code>bat_z %&gt;% 
   filter(position == &#39;catcher&#39;) %&gt;% 
   top_n(., 10, tot_z) %&gt;% 
@@ -368,7 +368,7 @@ description: "I never trusted WAR"
 </tr>
 </tbody>
 </table>
-<p>In addition to Gary Sanchez, who I identified earlier, Gattis would have also been a good pick based on his projected homeruns and runs batted in. His WAR is quite low, which is why he didn’t end up on my radar before. Let’s look at shortstops, just for completeness.</p>
+<p>In addition to Gary Sanchez, who I identified earlier, Gattis would have also been a good pick based on his projected homeruns and runs batted in. His WAR is quite low, which is why he didn’t end up on my radar before. Let’s look at shortstops too, for completeness.</p>
 <pre class="r"><code>bat_z %&gt;% 
   filter(position == &#39;short&#39;) %&gt;% 
   top_n(., 10, tot_z) %&gt;% 
@@ -513,8 +513,8 @@ description: "I never trusted WAR"
 </tr>
 </tbody>
 </table>
-<p>Simmons isn’t even on the list! Ouch. Given who was available by the fourth round, I maintain that Bogaerts might have been a fine pick (identified based on projected WAR in the last post) but it looks like Andrus might have also been helpful for his projected stolen bases and low projection for strikeouts.</p>
-<p>Let’s look at my second base pick, since prior analysis determined that it was also a position with scarce offensive talent.</p>
+<p>Simmons isn’t even on the list! Ouch. Given who was available by the fourth round, I maintain that Bogaerts might have been a fine pick (identified based on projected WAR in the <a href="/../portfolio/drafting-batters-part-2">last post</a>) but it looks like Andrus might have also been helpful for his projected stolen bases and low projection for strikeouts.</p>
+<p>Let’s look at my pick for second base, since prior analysis determined that it was also a position with scarce offensive talent.</p>
 <pre class="r"><code>bat_z %&gt;% 
   filter(position == &#39;second_base&#39;) %&gt;% 
   top_n(., 10, tot_z) %&gt;% 
@@ -660,11 +660,11 @@ description: "I never trusted WAR"
 </tbody>
 </table>
 <p>Given that no one who ranked above him was available in my league by the eighth round, Odor seems to be a reasonable pick.</p>
-<p>Alright, so now that I’m satisfied knowing that using z-scores would have changed my picks for catcher and shortstop, I’m going to look at z-scores for the rest of my draft picks.</p>
+<p>Now that I know using z-scores would have changed my picks for catcher and shortstop (but not second base), I’m going to look at z-scores for the rest of my draft picks.</p>
 </div>
 <div id="my-draft-picks" class="section level4">
 <h4>My draft picks</h4>
-<p>Clearly, using projected z-scores instead of projected WAR would have resulted in different draft picks. Let’s look at the z-scores for the players I did end up drafting. I added in information on draft order as well. For reference, I named my team “Dropped Third Strike”, after the <a href="https://sabr.org/research/dropped-third-strike-life-and-times-rule">obscure baseball rule</a>, so I’ve shortened it here to DTS for naming purposes.</p>
+<p>Below, I filtered the full dataset to only include players I drafted. For reference, my team name is “Dropped Third Strike”, after the <a href="https://sabr.org/research/dropped-third-strike-life-and-times-rule">obscure baseball rule</a> (shortened here to DTS for object-naming). I added in information on draft order as well.</p>
 <pre class="r"><code>DTS_bat &lt;- as.data.frame(cbind(c(&quot;Mookie Betts&quot;, &quot;Buster Posey&quot;, &quot;Andrelton Simmons&quot;, &quot;Edwin Encarnacion&quot;, &quot;Rougned Odor&quot;, &quot;Mike Moustakas&quot;, &quot;Adam Jones&quot;, &quot;Manuel Margot&quot;, &quot;Brandon Crawford&quot;, &quot;Max Kepler&quot;, &quot;Brandon Belt&quot;, &quot;Stephen Piscotty&quot;, &quot;Maikel Franco&quot;, &quot;Jose Peraza&quot;), c(01, 02, 04, 05, 08, 11, 12, 13, 18, 20, 21, 23, 24, 25)))
 names(DTS_bat) &lt;- c(&quot;Name&quot;, &quot;draft_order&quot;)
 
@@ -774,15 +774,17 @@ drafted %&gt;%
 </tr>
 </tbody>
 </table>
-<p>I ended up drafting four batters with negative projected z-scores: Margot, Crawford, Piscotty, and Peraza. Ouch! And fandom bias strikes again, because I ended up with three Giants, and one player from every other team. I already mentioned that Buster Posey was not the best pick at the catcher’s position, but I also ended up picking up Crawford, who had mediocre to bad projected z-scores for many scoring categories. This was a bad pick, and I ended up dropping him early in the season.</p>
+<p>I ended up drafting four batters with negative projected z-scores (meaning they are projected to perform below average): Margot, Crawford, Piscotty, and Peraza. And fandom bias strikes again, because I drafted three Giants, and one player from every other team. I already mentioned that Buster Posey was not the best pick at the catcher’s position, but I also ended up picking up Crawford, who had mediocre to bad projected z-scores for many scoring categories. This was a bad pick, and I ended up dropping him early in the season.</p>
 <div class="figure">
 <img src="https://media.giphy.com/media/lloFKP79zGtY4/giphy.gif" />
 
 </div>
 <p><br> </br></p>
+<p>I’m a little surprised by Franco, who has a rather high z-score for being available until the 24th round, and Belt for the same reason (21st round).</p>
 </div>
 </div>
 <div id="up-next" class="section level3">
 <h3>Up Next</h3>
 <p>In the <a href="/../portfolio/drafting-batters-part-4">next</a> post, I’ll wrap this up and look at how my players actually did, comparing the projection to the final 2018 data. Which players were truly bad picks? Who outperformed their projection? Stay tuned!</p>
+<p><a href="/../portfolio/drafting-batters-part-4">Drafting Batters in Fantasy Baseball, Part 4</a></p>
 </div>
