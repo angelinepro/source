@@ -3,11 +3,13 @@ date = "2016-11-06T13:00:25+05:30"
 title = "publications"
 +++
 
+Zhao Y, Hoenig JM, <b>Protacio A</b>, Lim S, Norman CC. <a href="https://www.ncbi.nlm.nih.gov/pubmed/32035374">Identification of risk factors for early psychiatric rehospitalization. </a> Psychiatric Research. 2020 Jan 21.
+
+Terry MB, Cohn BA, Goldberg M, Flom JD, Wei Y, Houghton LC, Tehranifar P, McDonald JA, <b>Protacio A</b>, Cirillo P, Michels KB. <a href="https://www.ncbi.nlm.nih.gov/pubmed/30383202">Do Birthweight and Weight Gain During Infancy and Early Childhood Explain Variation in Mammographic Density in Women in Midlife? Results From Cohort and Sibling Analyses. </a> American Journal of Epidemiology. 2019 Feb 1. 
+
 Tang E, <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief108.pdf">Suicides among males in New York City, 2007 to 2016. </a> New York Department of Health and Mental Hygiene Epi Data Brief. 2019 January.
 
 <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief107.pdf">Mental Health Emergency Department Visits among New York City Adults, 2015. </a> New York Department of Health and Mental Hygiene Epi Data Brief. 2018 November.
-
-Terry MB, Cohn BA, Goldberg M, Flom JD, Wei Y, Houghton LC, Tehranifar P, McDonald JA, <b>Protacio A</b>, Cirillo P, Michels KB. <a href="https://www.ncbi.nlm.nih.gov/pubmed/30383202">Do Birthweight and Weight Gain During Infancy and Early Childhood Explain Variation in Mammographic Density in Women in Midlife? Results From Cohort and Sibling Analyses. </a> American Journal of Epidemiology. 2018 November 01. 
 
 Tang E, <b>Protacio A</b>, Norman C. <a href="https://www1.nyc.gov/assets/doh/downloads/pdf/epi/databrief101.pdf">Suicides among females in New York City, 2006 to 2015. </a>New York City Department of Health and Mental Hygiene Epi Data Brief. 2018 May.
 

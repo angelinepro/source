@@ -9,6 +9,8 @@ I am a data nerd, and this is where I share my data adventures, covering topics 
 
 #### highlights of recent work:
 
+I presented work from my blog posts on fantasy baseball at useR! 2019 in Toulouse, France. You can find slides on GitHub (click on the github icon in the sidebar), as well as video <a href="https://www.youtube.com/watch?v=uhQMBArGXRE">here</a>, starting at 9:26. 
+
 I built a mental health syndromic surveillance system that signals when there are changes in emergency department visit patterns for suicidal behavior visits, and presented on it at the New York State Suicide Prevention Conference [here][2]. I’ve also written about what suicide deaths look like in New York City, how that has changed since 2000, and how these deaths are different from suicide deaths in the rest of the United States [here][3] and [here][4].
 
 I’ve taught R programming to analysts working for NYC (nearly 150 analysts over the course of a year), explaining the nuts and bolts of R programming, demonstrating how to conduct exploratory data analysis, teaching data visualization and functional programming. I’ve also assisted teaching first-year graduate students about categorical data analysis, SAS programming, and quantitative foundations of biostatistics and epidemiology.
