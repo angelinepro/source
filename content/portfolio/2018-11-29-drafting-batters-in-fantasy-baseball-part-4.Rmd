@@ -17,18 +17,13 @@ image: "img/portfolio/grass.jpg"
 description: "Projections, reality, and counterfactuals"
 ---
 
-###Where were we?
+### Where were we?
 If you're reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading [this](/../portfolio/drafting-batters-part-1) first. 
 <br>
 </br>
 In the last three posts, I wrote about [my draft strategy using projected WAR](/../portfolio/drafting-batters-part-1), and [explored fantasy talent by defensive position](/../portfolio/drafting-batters-part-2). I discovered that [WAR](https://www.fangraphs.com/library/misc/war/) (Wins Above Replacement) was not a great way to select players given my league's scoring categories. I [calculated z-scores](/../portfolio/drafting-batters-part-3) for my scoring categories instead, and looked at how that would have changed my draft picks. I did some deep reflection on the danger of fandom bias. 
 
-<center>
-<img src="https://media.giphy.com/media/l2SpZsWedp4ql8I00/giphy.gif", style="width:450px;"></img>
-</center>
-<br/><br/> 
-
-
+![](https://media.giphy.com/media/l2SpZsWedp4ql8I00/giphy.gif)
 
 
 ```{r echo=FALSE, warning = FALSE, message = FALSE}
@@ -60,7 +55,7 @@ names(DTS_bat) <- c("Name", "draft_order")
 drafted <- inner_join(DTS_bat, bat_z, by = "Name") 
 ```
 
-###Projections vs. 2018 season statistics
+### Projections vs. 2018 season statistics
 Up to this point, we've been looking at projections for 2018. Now that the season is over, we can see just how these projections played out. I used the final 2018 stats from [Fangraphs](https://www.fangraphs.com/leaders.aspx?pos=all&stats=bat&lg=all&qual=y&type=8&season=2018&month=0&season1=2018&ind=0), and compared them to the projected stats. I've renamed all final stats to include the f_ prefix for clarity, calculated z-scores for each stat, and over the total, and then I merged this dataset to the full batters dataset, to facilitate comparison. I also merged it to the subset of players I drafted to look specifically at my team, Dropped Third Strike.
 ```{r final-z, message=FALSE, warning=FALSE}
 end_bat_z <- read.csv("../data/post1/batters_final.csv") %>%
@@ -136,10 +131,10 @@ drafted_final %>%
 
 Moustakas improved his RBIs, and got a little better at base stealing, but was otherwise pretty close to his projections. Kepler scored a few more runs, and was a bad pick to start with, but was at least consistent. Franco showed better plate discipline (fewer strikeouts), but was otherwise the same. 
 
-###What-if land
+### What-if land
 Not content to sit with the bad decisions I made, I engaged in some ill-advised counterfactual exploration, and looked to see what might have happened had I drafted the players with higher z-scores, rather than drafting based on WAR. 
 
-####First Base
+#### First Base
 I looked at which players had higher projected z-scores than Encarnacion, and whether they were available at the time I drafted Encarnacion in the fifth round. 
 
 ```{r counterfactual-1B}
@@ -153,7 +148,7 @@ all_final %>%
 
 This makes me feel a little better -- the first basemen with higher projected total_z scores were drafted prior to my turn in the fifth. Most of them underperformed their projections, but still did well, except for Joey Votto, whose runs scored, home runs, and runs batted in are much lower than projected, leading to his abysmal final z-score this year.  Other first basemen who were projected to perform worse than Encarnacion also underperformed their projection. <b>All things considered, Edwin wasn't a bad draft pick</b>.
 
-####Outfield
+#### Outfield
 I was really happy that I drafted Betts in the first round, given that he had high z-scores to begin with and then subsequently outperformed his projection. I looked at the next outfielder I drafted, who was Jones in the 12th round. Since all outfielders (except Brantley) with higher z-scores were drafted prior to my pick in the 12th round, I'll exclude them from the table for simplicity's sake.
 
 ```{r counterfactual-OF}
@@ -172,7 +167,7 @@ Looking at both Brantley and Jones, Brantley was projected to do a bit better th
 <br></br>
 The projections for these players aren't that different from each other, so I'm kicking myself for not predicting the future, which is not constructive. I think the main message here is that <b>I shouldn't have waited this long to pick my other two outfielders</b>. My third outfielder, Kepler, didn't even break the top 30. Given what I know now about outfielders contributing to runs, homeruns, and RBIs, this is a huge shortcoming in my strategy. 
 
-####Third Base
+#### Third Base
 I drafted Moustakas late, in round 11. In the table, I filtered out players with higher z-scores
 who had been selected in earlier rounds of the draft, and took the top five since there are fewer third basemen.  
 
@@ -196,7 +191,7 @@ Ultimately, <b>Moustakas did just fine relative to his projection, and I could h
 I did also end up drafting Franco in a later round, which seems reasonable given his projected z-score. He underperformed his projection, however, and didn't contribute much to my offense. 
 
 
-####Second Base
+#### Second Base
 All the players with higher projected total z-scores than Odor were already gone by the time I got picked up Odor in the 8th round. 
 
 ```{r counterfactual-2B}
@@ -210,7 +205,7 @@ all_final %>%
 
 It's worth noting here that none of the other second basemen would have been substantially better than Odor, based on the projections. Dee Gordon was projected to steal a lot more bases, but he was also projected to hit considerably fewer home runs, and bat in fewer runs. Additionally, none of these candidates outperformed their projections. Given that, <b>I think Odor was the right choice here</b>. 
 
-####Catcher
+#### Catcher
 Posey was the first catcher to be drafted, so every catcher was available to me at the time. 
 
 ```{r counterfactual-C}
@@ -231,7 +226,7 @@ As a bonus, I did a little bit of exploration in my own league, and I found that
 ![](https://media.giphy.com/media/2Xu7pvbQdbj68/giphy.gif)
 
 
-####Shortstop
+#### Shortstop
 I drafted Simmons in the fourth round, early enough that most shortstops were still available. I excluded the three that had already been picked (Correa, Turner, and Lindor). 
 ```{r counterfactual-SS}
 all_final %>% 
@@ -248,7 +243,7 @@ Given Simmons's low projected z-score, there are plenty of shortstops I could ha
 
 Even though Simmons ended up outperforming his projection, it was as a result of fewer strikeouts, rather than increased runs. <b>I would have done better with any of the others shortstops I mentioned, underscoring how big of a mistake it was to draft Simmons as early as I did</b>. Down with WAR.
 
-###Lessons learned
+### Lessons learned
 Phew! That was a lot of analysis, and I applaud you if you stuck with me through this exploration. For those of you who skipped to the end, here are my top three takeaways from all this:
 
 <ol>
@@ -261,7 +256,7 @@ Phew! That was a lot of analysis, and I applaud you if you stuck with me through
 
 
 
-###Next steps
+### Next steps
 Next, I'll be looking at my strategy for drafting pitchers, and breaking it apart in a similar fashion to see what can be improved for next year. I'll also write about putting this all together to create a cohesive drafting strategy, since we draft pitchers and batters at the same time. 
 
 Hopefully this post has provided some food for thought, and sparked some strategies for building your fantasy team. If you have questions or comments, find me on [twitter](https://twitter.com/dataangeline)!

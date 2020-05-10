@@ -21,7 +21,7 @@ description: "Projections, reality, and counterfactuals"
 <div id="TOC">
 <ul>
 <li><a href="#where-were-we">Where were we?</a></li>
-<li><a href="#projections-vs.2018-season-statistics">Projections vs. 2018 season statistics</a></li>
+<li><a href="#projections-vs.-2018-season-statistics">Projections vs. 2018 season statistics</a></li>
 <li><a href="#what-if-land">What-if land</a></li>
 <li><a href="#lessons-learned">Lessons learned</a></li>
 <li><a href="#next-steps">Next steps</a></li>
@@ -30,13 +30,13 @@ description: "Projections, reality, and counterfactuals"
 
 <div id="where-were-we" class="section level3">
 <h3>Where were we?</h3>
-<p>If you’re reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading <a href="/../portfolio/drafting-batters-part-1">this</a> first. <br> </br> In the last three posts, I wrote about <a href="/../portfolio/drafting-batters-part-1">my draft strategy using projected WAR</a>, and <a href="/../portfolio/drafting-batters-part-2">explored fantasy talent by defensive position</a>. I discovered that <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement) was not a great way to select players given my league’s scoring categories. I <a href="/../portfolio/drafting-batters-part-3">calculated z-scores</a> for my scoring categories instead, and looked at how that would have changed my draft picks. I did some deep reflection on the danger of fandom bias.</p>
-<center>
-<img src="https://media.giphy.com/media/l2SpZsWedp4ql8I00/giphy.gif", style="width:450px;"></img>
-</center>
-<p><br/><br/></p>
+<p>If you’re reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading <a href="/../portfolio/drafting-batters-part-1">this</a> first.
+<br>
+</br>
+In the last three posts, I wrote about <a href="/../portfolio/drafting-batters-part-1">my draft strategy using projected WAR</a>, and <a href="/../portfolio/drafting-batters-part-2">explored fantasy talent by defensive position</a>. I discovered that <a href="https://www.fangraphs.com/library/misc/war/">WAR</a> (Wins Above Replacement) was not a great way to select players given my league’s scoring categories. I <a href="/../portfolio/drafting-batters-part-3">calculated z-scores</a> for my scoring categories instead, and looked at how that would have changed my draft picks. I did some deep reflection on the danger of fandom bias.</p>
+<p><img src="https://media.giphy.com/media/l2SpZsWedp4ql8I00/giphy.gif" /></p>
 </div>
-<div id="projections-vs.2018-season-statistics" class="section level3">
+<div id="projections-vs.-2018-season-statistics" class="section level3">
 <h3>Projections vs. 2018 season statistics</h3>
 <p>Up to this point, we’ve been looking at projections for 2018. Now that the season is over, we can see just how these projections played out. I used the final 2018 stats from <a href="https://www.fangraphs.com/leaders.aspx?pos=all&amp;stats=bat&amp;lg=all&amp;qual=y&amp;type=8&amp;season=2018&amp;month=0&amp;season1=2018&amp;ind=0">Fangraphs</a>, and compared them to the projected stats. I’ve renamed all final stats to include the f_ prefix for clarity, calculated z-scores for each stat, and over the total, and then I merged this dataset to the full batters dataset, to facilitate comparison. I also merged it to the subset of players I drafted to look specifically at my team, Dropped Third Strike.</p>
 <pre class="r"><code>end_bat_z &lt;- read.csv(&quot;../data/post1/batters_final.csv&quot;) %&gt;%
@@ -344,7 +344,9 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
 </tbody>
 </table>
 <p>Posey, whom we’ve alreaady determined at this point was drafted too early and was a poor choice based on his projection, added salt to the wound by underperforming. I knew this even without looking at the stats, given his abysmal offensive season, but this confirms it.</p>
-<p><img src="https://media.giphy.com/media/YzgUKarHP6IwM/giphy.gif" /> <br> </br></p>
+<p><img src="https://media.giphy.com/media/YzgUKarHP6IwM/giphy.gif" />
+<br>
+</br></p>
 <p>Encarnacion scored fewer runs than his projections, but otherwise still provided good offensive numbers. Odor showed better plate discipline (fewer strikeouts), but his offensive output decreased dramatically. Jones also had a poor offensive year. Margot was a bad draft pick, who started out with poor projections and got even worse, as did Crawford. Belt improved his plate discipline, but his offensive numbers also tanked.</p>
 <p>Now let’s look at those who performed as expected, whose z-scores changed by 1 or less.</p>
 <pre class="r"><code>drafted_final %&gt;% 
@@ -858,15 +860,14 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
 </tbody>
 </table>
 <p>Looking at both Brantley and Jones, Brantley was projected to do a bit better than Jones largely due to his low strikeout and high stolen bases projection. Jones was projected to handily beat Brantley in homeruns, and runs batted in. I probably selected Jones to boost my homerun numbers. But Jones had a pretty bad season, and Brantley outperformed his projections, so now I feel the pangs of regret. Both Mazara and Cain had already been drafted by the time I picked in the 12th round. Rosario had pretty similar projections to Jones, just with more strikeouts, and he also outperformed his projections.</p>
-<div class="figure">
-<img src="https://media.giphy.com/media/eIPWi6pWyCHmg/giphy.gif" />
-
-</div>
-<p><br></br> The projections for these players aren’t that different from each other, so I’m kicking myself for not predicting the future, which is not constructive. I think the main message here is that <b>I shouldn’t have waited this long to pick my other two outfielders</b>. My third outfielder, Kepler, didn’t even break the top 30. Given what I know now about outfielders contributing to runs, homeruns, and RBIs, this is a huge shortcoming in my strategy.</p>
+<p><img src="https://media.giphy.com/media/eIPWi6pWyCHmg/giphy.gif" /></p>
+<p><br></br>
+The projections for these players aren’t that different from each other, so I’m kicking myself for not predicting the future, which is not constructive. I think the main message here is that <b>I shouldn’t have waited this long to pick my other two outfielders</b>. My third outfielder, Kepler, didn’t even break the top 30. Given what I know now about outfielders contributing to runs, homeruns, and RBIs, this is a huge shortcoming in my strategy.</p>
 </div>
 <div id="third-base" class="section level4">
 <h4>Third Base</h4>
-<p>I drafted Moustakas late, in round 11. In the table, I filtered out players with higher z-scores who had been selected in earlier rounds of the draft, and took the top five since there are fewer third basemen.</p>
+<p>I drafted Moustakas late, in round 11. In the table, I filtered out players with higher z-scores
+who had been selected in earlier rounds of the draft, and took the top five since there are fewer third basemen.</p>
 <pre class="r"><code>all_final %&gt;% 
   filter(position == &#39;third_base&#39; &amp; tot_z &lt; 3.2) %&gt;% 
   top_n(., 5, tot_z) %&gt;% 
@@ -983,7 +984,9 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
 </table>
 <p>By the time I had a chance to draft Moustakas in the 11th round, Beltre and Gallo were still available. Given how much Beltre underperformed his projection, it looks like I dodged a bullet. Gallo would have been a better option for runs and home runs, but his strikeouts are really quite high (even after a bit of discipline this year, he still had twice as many strikeouts as Moustakas).</p>
 <p>Shaw would have been another reasonable option – his z-score was quite low due to his high projected number of strikeouts, but his projected runs, homeruns, and RBIs are comparable to Moustakas’s, and he was also projected to steal more bases.</p>
-<p>Ultimately, <b>Moustakas did just fine relative to his projection, and I could have done well with either Gallo or Shaw</b>. <img src="https://media.giphy.com/media/12TnoX7uknM3XW/giphy.gif" /> <br></br></p>
+<p>Ultimately, <b>Moustakas did just fine relative to his projection, and I could have done well with either Gallo or Shaw</b>.
+<img src="https://media.giphy.com/media/12TnoX7uknM3XW/giphy.gif" />
+<br></br></p>
 <p>I did also end up drafting Franco in a later round, which seems reasonable given his projected z-score. He underperformed his projection, however, and didn’t contribute much to my offense.</p>
 </div>
 <div id="second-base" class="section level4">
@@ -1310,10 +1313,7 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
 <p>I’ve spent the past few posts kicking myself for drafting Posey, but I’m not sure the numbers merit drafting any other catcher in round two. The two catchers with higher projected z-scores (Sanchez and Gattis) would have hit more home runs and batted in more runs, but their strikeouts were also nearly twice that of Posey. The clincher is that both also ended up underperforming their projections.</p>
 <p>Looking at the top 10 catchers, only a few substantially outpeformed their projections. Given that there isn’t much variation in this group (namely, most of them are pretty bad), <b>this is probably a good reason not to draft catchers in the second round</b>.</p>
 <p>As a bonus, I did a little bit of exploration in my own league, and I found that most people don’t draft catchers in the first 10 rounds, because catchers don’t seem to make much of a difference. More reasons not to draft catchers so early.</p>
-<div class="figure">
-<img src="https://media.giphy.com/media/2Xu7pvbQdbj68/giphy.gif" />
-
-</div>
+<p><img src="https://media.giphy.com/media/2Xu7pvbQdbj68/giphy.gif" /></p>
 </div>
 <div id="shortstop" class="section level4">
 <h4>Shortstop</h4>

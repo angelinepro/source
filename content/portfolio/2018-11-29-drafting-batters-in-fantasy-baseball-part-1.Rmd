@@ -18,7 +18,7 @@ description: "My very stressful and questionable fantasy baseball draft strategy
 image: "img/portfolio/hyacinth.jpg"
 ---
 
-###My first season in fantasy baseball
+### My first season in fantasy baseball
 
 I joined a fantasy baseball league for the first time this year, which may come as a shock to those of you who know that I love both baseball and data. I was in a fantasy basketball league a few years ago, but because I haven't watched basketball seriously in about 15 years, these were two very unsatisfying seasons. I was hoping it would encourage me to watch more basketball, but instead I made zero moves, stubbornly refused to trade Kevin Durant, and effectively set my league fees on fire. 
 
@@ -32,7 +32,7 @@ There are a lot of parts to Fantasy Baseball, so I'm going to break this up into
 
 I wrote this post because my initial search for fantasy baseball strategies returned many articles written for people with substantial prior fantasy sports experience. I wanted a reference for someone without significant experience in fantasy sports, that could be implemented by someone with a surface level understanding of baseball and minimal statistics knowledge. I decided to write the guide I wanted to read before this all began. Let's begin.
 
-###What is fantasy baseball?
+### What is fantasy baseball?
 Fantasy leagues are made up of several teams competing against each other to win certain scoring categories. For those who have never played any fantasy sports, I'll use my league as an example. 
 
 My league uses the following scoring categories: 
@@ -111,7 +111,7 @@ An afternoon is not enough time to learn about how to play fantasy baseball and 
 
 How WAR is calculated differs by source. I got my projected WAR data from Fangraphs, which is calculated using a combination of offensive, defensive, and base running statistics. WAR was already part of the data I downloaded from Fangraphs, so I saved time not calculating a new statistic. However, all of my scoring categories are based on offensive statistics. WAR, while accounting for offensive statistics, also accounts for defense and base running, which are irrelevant to my scoring categories. Someone who has a high WAR may be excellent defensively, but may put up average offensive numbers. They may not help me win my scoring categories. I didn't take this into account when preparing for my draft, but it ended up coming back to bite me later on.
 
-####WAR, what is it good for?
+#### WAR, what is it good for?
 
 I looked at the distribution of projected WAR among all the players in the dataset, to understand how to split players into quantiles. I used a histogram to make sure the number of quantiles I wanted to split players into was large enough to capture the variance in WAR. If I split players up into too few quantiles, I might collapse exceptional players (WAR > 6) with reasonably good players (WAR = 3). If I split players into too many quantiles, I'll end up with one player in each, which is not helpful for making comparisons.
 
@@ -166,7 +166,7 @@ Picking these two in the second and fourth round, in hindsight, was not the best
 ![](https://media.giphy.com/media/WeMQzWA2aiJuU/giphy.gif)
 <br/><br/>
 
-####WARning signs
+#### WARning signs
 I decided to look at how each of the scoring categories related to projected WAR. To do that, I standardized the scoring categories to simplify interpretation and visualization, since the range differs greatly across the scoring categories. Then, I plotted the standardized version against projected WAR. 
 
 
@@ -194,7 +194,7 @@ ggplot(batters %>%
 
 Looking at these plots, projected WAR seems to increase slightly with the first four scoring categories, but it doesn't seem to increase with stolen bases (SB_z), or strikeouts (SO_z) at all.
 
-####WAR is not the answer (good god, y'all)
+#### WAR is not the answer (good god, y'all)
 It looks like WAR isn't great for identifying players that would help win my scoring categories, and it's not at all related to stealing bases or striking out. I shouldn't rely on this overall summary category to guide my decisions. Instead, perhaps it'd be more useful to rank players based on their projected performance for each scoring category. The performance in the scoring categories is ultimately what matters, and what will decide whether my team wins the matchup that week.
 
 At this point in the draft, I changed strategies, and split players into quantiles by 50 again, and ranked each scoring category separately. This time, I filtered results to players who were in the top 4% of projections for runs, home runs, runs batted in, and on base plus slugging. I limited it to these four scoring categories because no player was in the top 4% for all six, and only Mike Trout was in the top 4% for these four categories plus base stealing. 
@@ -229,7 +229,7 @@ In hindsight, I would have been better off spending more than an afternoon strat
 
 <br/><br/> 
 
-###Up next
+### Up next
 In the [next part][1], I'll explore positional talent as it relates to my draft decisions. Nevermind that I drafted Buster Posey in the second round, but should I have drafted ANY catcher in the second round? Would I have been better off drafting a player from some other position? Which positions are preferable to select from in the early rounds? This will all be covered in the [next post][1]. Stay tuned!
 
 

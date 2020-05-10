@@ -1,0 +1,311 @@
+---
+title: Predicting Quality Starts
+author: Angeline Protacio
+date: '2020-05-10'
+slug: quality-starts
+output:
+  blogdown::html_page:
+    toc: true 
+categories: []
+tags:
+  - baseball
+  - fantasy
+  - R
+  - linear_regression
+  - Quality_Start
+image: "img/portfolio/lavender.jpg"
+description: "Linear regression with scikit-learn"
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#getting-the-data">Getting the Data</a></li>
+<li><a href="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
+<li><a href="#modeling">Modeling</a></li>
+<li><a href="#interpreting-the-model-results">Interpreting the Model Results</a></li>
+<li><a href="#wrapping-it-all-up">Wrapping It All Up</a></li>
+</ul>
+</div>
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>In developing a strategy for drafting pitchers, I had Fangraphs projections for all of the relevant scoring categories except quality starts. I searched high and wide for this through all of the projection systems on Fangraphs, and then I came across this comment, which made me realize I wasn’t the only one who wanted it.</p>
+<p><img src="/img/quality_start/comment.png" /></p>
+<p>Clearly, if I figured out how to predict quality starts, I’d be addressing a gap for me and other fantasy baseball owners, and I’d be able to apply my z-score method (addressed <a href="/../portfolio/drafting-batters-part-3">here</a>) to pitching data as well. Quality starts is continuous, so linear regression seemed like an appropriate approach.</p>
+</div>
+<div id="getting-the-data" class="section level3">
+<h3>Getting the Data</h3>
+<p>I already wrote a <a href="/../portfolio/webscraping">post</a> about scraping data from Fangraphs and Baseball Reference. I saved all of the data as .csv files by year. I did a bit of data cleaning which I’m not going to spend a lot of time on, but if you’re curious, you can find my code <a href="https://github.com/angelinepro/portfolio_supplemental/tree/master/predicting_quality_starts">here</a>. A few highlights of data cleaning: I discovered that there are some jokers at Fangraphs who decided to enter projections for “Rob W00t3n”, rather than “Rob Wooten”, sometimes, a space isn’t just a space, but a “\xa0” character, and there’s a lot of non-unique names in baseball.</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Tonight I watched Will Smith, catcher, make the final out on a dropped third strike thrown by Will Smith, pitcher, while my husband hummed the theme to the Wild Wild West, sung by Will Smith, rapper.
+</p>
+— Angeline (<span class="citation">@dataangeline</span>) <a href="https://twitter.com/dataangeline/status/1170210860427620352?ref_src=twsrc%5Etfw">September 7, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Fortunately, limiting this analysis to pitchers only meant that didn’t cause as much trouble as I feared.</p>
+<p>Let’s start by loading in the cleaned datasets, which are a combination of Fangraphs projection data and Baseball Reference season data.</p>
+<pre class="python"><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LassoCV
+import numpy as np</code></pre>
+<pre class="python"><code>df = pd.read_csv(&#39;../data/post6/training_data_model.csv&#39;)
+df_subset = df[[&#39;QS_2016&#39;, &#39;FIP_proj_2017&#39;, &#39;QS_2017&#39;]].dropna()</code></pre>
+<p>I’ve broken up my training, validation, and test data by year, reflected in the table below. If you are unfamiliar with predictive modeling, breaking up my data into training/validation/test gives me a few fresh datasets to test my model on, to see if it actually does well on new, unseen data, or if it’s only good at explaining data it’s already seen. I only kept players that showed up in both the Fangraphs projection data, the Baseball Reference season data, and had values for “Quality Start” in the following season. This means that of the 4000 players I scraped data for, each of these datasets has a sample size of just above 200 players. I lost a lot of data, which (spoiler alert) impacted my prediction model. We’ll get into that later.</p>
+<table>
+<colgroup>
+<col width="11%" />
+<col width="26%" />
+<col width="28%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Training Data (n=214)</th>
+<th>Validation Data (n=208)</th>
+<th>Test Data (n=231)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Features</td>
+<td>2016 Season Data <br> 2017 Projection Data</td>
+<td>2017 Season Data <br> 2018 Projection Data</td>
+<td>2018 Season Data <br> 2019 Projection Data</td>
+</tr>
+<tr class="even">
+<td>Target</td>
+<td>2017 Quality Starts</td>
+<td>2018 Quality Starts</td>
+<td>2019 Quality Starts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="exploratory-data-analysis" class="section level3">
+<h3>Exploratory Data Analysis</h3>
+<p>I did some exploratory data analysis by plotting a histogram to better understand how quality starts (also called my ‘target’) are distributed.</p>
+<pre class="python"><code>sns.distplot(df[&#39;QS_2017&#39;], bins = 23, kde = False ,color = &quot;#002D72&quot;)
+plt.title(&#39;Distribution of Quality Starts in 2017&#39;)
+plt.xlabel(&#39;Total Quality Starts in 2017&#39;)
+plt.ylabel(&#39;Number of Pitchers&#39;)
+plt.show();</code></pre>
+<p><img src="/portfolio/2020-04-26-predicting-the-quality-start_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>It’s clear that there are a lot of pitchers with a total of zero quality starts. Among those who have at least one quality start, there’s a large range. The distribution is right skewed, which means that there are a few pitchers earning a lot more quality starts than the rest (20+).</p>
+<p>I also did some preliminary modeling on some variables (also called ‘features’) I expected to have an impact on quality starts, as a data quality check. I expected that one year’s quality starts would have an effect on the next year’s quality starts, so I plotted those.</p>
+<pre class="python"><code>plt.scatter(df_subset[&#39;QS_2016&#39;], df_subset[&#39;QS_2017&#39;])
+plt.xlabel(&quot;QS_2016&quot;)
+plt.ylabel(&quot;QS_2017&quot;)
+plt.title(&quot;Relationship between Quality Starts in 2016 and Quality Starts in 2017&quot;, y = 1.08)
+plt.show()</code></pre>
+<p><img src="/portfolio/2020-04-26-predicting-the-quality-start_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+This graph displays quality starts in 2016 and 2017. The distribution doesn’t show a clear positive slope, but there is some positive association. This means that for some pitchers, one year’s quality starts is linked to the next. This isn’t true for all pitchers though, making the association a weak one.</p>
+<p>I also looked at Fielding Independent Pitching (FIP), which is a measure of a pitcher’s effectiveness regardless the team defense behind him. This statistic focuses only the events a pitcher can control, like strikeouts, walks, and homeruns. I expected that pitchers with a lower FIP (indicating more effectiveness) would have more quality starts.</p>
+<pre class="python"><code>plt.scatter(df_subset[&#39;FIP_proj_2017&#39;], df_subset[&#39;QS_2017&#39;])
+plt.xlabel(&quot;FIP_proj_2017&quot;)
+plt.ylabel(&quot;QS_2017&quot;)
+plt.title(&quot;Relationship between Projected \nFielding Independent Pitching \nand Quality Starts in 2017&quot;, y = 1.08)
+plt.tight_layout()
+plt.show()</code></pre>
+<p><img src="/portfolio/2020-04-26-predicting-the-quality-start_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>The negative slope for this plot verifies my expectation - the higher the FIP, the lower the quality starts. Based on these plots, I think I have an understanding of how features (like previous year’s quality starts and projected FIP) are connected to my target (quality starts). I did a little more exploratory plotting, because it’s always good to get a good handle on your data, but in the interest of keeping this post shorter, let’s jump to modeling.</p>
+</div>
+<div id="modeling" class="section level3">
+<h3>Modeling</h3>
+<div id="training-data" class="section level4">
+<h4>Training Data</h4>
+<p>I started modeling by looking at all the features in the training data and selecting a few that I’d expect to have an impact on quality starts. The features selected were based on correlation with the target, and studying pairplots. My initial list included innings pitched, games started, team wins in games started, game score, and a few others. You can compare the list below to the glossary at <a href="https://github.com/angelinepro/portfolio_supplemental/tree/master/predicting_quality_starts">Baseball Reference</a>, and <a href="https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml">Fangraphs</a> to understand the full list of the features I selected. Then, I dropped any rows with missing values, since my prediction model won’t like that.</p>
+<pre class="python"><code>varlist3 = [&#39;QS_2017&#39;, &#39;IP_2016&#39;, &#39;GS_2016&#39;, &#39;Wgs_2016&#39;, &#39;Wtm_2016&#39;,  &#39;QS_2016&#39;, &#39;GmScA_2016&#39;, &#39;Best_2016&#39;, &#39;lDR_2016&#39;, &#39;IP/GS_2016&#39;, &#39;Pit/GS_2016&#39;, &#39;100-119_2016&#39;, &#39;Max_2016&#39;, &#39;IP_proj_2017&#39;, &#39;K_proj_2017&#39;, &#39;ERA_proj_2017&#39;, &#39;FIP_proj_2017&#39;, &#39;zWAR_proj_2017&#39;]
+df_nona = df.loc[:,varlist3].dropna()
+df_nona.shape</code></pre>
+<pre><code>## (214, 18)</code></pre>
+<p>After dropping all rows with any missing, my training data with these features has 214 rows. I’ll break up my training data into my features (x_train) and target (y_train), and now I’m ready to start modeling.</p>
+<pre class="python"><code>x_train = df_nona.iloc[:, 1:]
+y_train = df_nona.iloc[:, :1]</code></pre>
+<p>I did all of my modeling with the python library scikit-learn. I started with a simple Linear Regression to establish a baseline.</p>
+<pre class="python"><code>m1 = LinearRegression()
+m1.fit(x_train,y_train)</code></pre>
+<pre><code>## LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None, normalize=False)</code></pre>
+<pre class="python"><code>m1.score(x_train,y_train)</code></pre>
+<pre><code>## 0.4449424352353504</code></pre>
+<p>The R^2 score is a measure of how well my model explains the variation in the target. The higher the R^2, the better, and it can go as high as 1. This R^2 of 0.44 doesn’t inspire a ton of confidence in my model.</p>
+<p><img src="https://media.giphy.com/media/26BRJacsGgySuobVC/giphy.gif" /></p>
+<p>Sometimes, a model fit can be improved by using polynomial features, if the relationship is polynomial (for instance, if one year’s quality starts meant having ^2 as many quality starts the next year). Given my exploratory analysis, it didn’t look like there were any polynomial relationships (and it is pretty silly to think that having 10 quality starts in one year would lead to 100 the next), but maybe it will help!</p>
+<pre class="python"><code>mp1 = LinearRegression()
+p = PolynomialFeatures(degree = 2)
+x_train_poly = p.fit_transform(x_train)
+mp1.fit(x_train_poly, y_train)</code></pre>
+<pre><code>## LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None, normalize=False)</code></pre>
+<pre class="python"><code>mp1.score(x_train_poly, y_train)</code></pre>
+<pre><code>## 0.8080558133200387</code></pre>
+<p>An R^2 of 0.81 is much better! But it’s… too much better.</p>
+<p><img src="https://media.giphy.com/media/11q2f8tniG9Rwk/giphy.gif" /></p>
+<p>I’ve probably overfit my model to the training data. I will run the same model on the validation data to see how it performs. If I get an R^2 of around 0.80 on the validation data, then the model does a good job! If it gets something closer to 0.40, then I’d be better off removing the polynomial features.</p>
+</div>
+<div id="validation-set" class="section level4">
+<h4>Validation Set</h4>
+<pre class="python"><code>validation = pd.read_csv(&#39;../data/post6/validation_data_model.csv&#39;)
+varlist_val = [&#39;QS_2018&#39;, &#39;IP_2017&#39;, &#39;GS_2017&#39;, &#39;Wgs_2017&#39;, &#39;Wtm_2017&#39;,  &#39;QS_2017&#39;, &#39;GmScA_2017&#39;, &#39;Best_2017&#39;, &#39;lDR_2017&#39;, &#39;IP/GS_2017&#39;, &#39;Pit/GS_2017&#39;, &#39;100-119_2017&#39;, &#39;Max_2017&#39;, &#39;IP_2018&#39;, &#39;K_2018&#39;, &#39;ERA_2018&#39;, &#39;FIP_2018&#39;, &#39;zWAR_2018&#39;]
+validation_simple = validation.loc[:,varlist_val]
+validation_simple = validation_simple.dropna()
+validation_simple.shape</code></pre>
+<pre><code>## (208, 18)</code></pre>
+<pre class="python"><code>x_val = validation_simple.iloc[:,1:]
+y_val = validation_simple.loc[:,[&#39;QS_2018&#39;]]</code></pre>
+<p>Bringing in the validation set, I’ve selected the same features for the validation data, removed all missings, and broken the data into features and target. There are a total of 208 rows.</p>
+<p>I’ll run the model with polynomial features on the validation data first.</p>
+<pre class="python"><code>x_val_poly = p.transform(x_val)
+mp1.score(x_val_poly, y_val)</code></pre>
+<pre><code>## -4.891614681424794</code></pre>
+<p>A negative R^2!</p>
+<p><img src="https://media.giphy.com/media/RwdafcAEFVkc/giphy.gif" /></p>
+<p>The polynomial features model definitely overfit. My suspicions were confirmed, there isn’t much to suggest any polynomial relationship. Let’s try the simpler model (the first one I ran) on the validation data.</p>
+<pre class="python"><code>m1.score(x_val,y_val)</code></pre>
+<pre><code>## 0.3530370475302911</code></pre>
+<p>This is much closer to the R^2 for the training set, but it’s still not a great R^2.</p>
+<p>I am concerned about my small sample size of ~200 players. Perhaps I could improve my R^2 with an increased sample size, by only using either projection data from Fangraphs, or season data from Baseball Reference (especially since I’m not convinced that both are heavily contributing to my model).</p>
+</div>
+<div id="modeling-projection-features-only" class="section level4">
+<h4>Modeling Projection Features Only</h4>
+<p>I decided to use just the projection features from Fangraphs, since that left more players in the dataset than using the season features from Baseball Reference. The code below subsets the data to include only projection features, removes players with missing data, and breaks up the data into features and target.</p>
+<pre class="python"><code>proj_varlist = [&#39;QS_2017&#39;, &#39;Age_proj_2017&#39;, &#39;G_proj_2017&#39;, &#39;GS_proj_2017&#39;, &#39;IP_proj_2017&#39;, &#39;K_proj_2017&#39;,  &#39;BB_proj_2017&#39;, &#39;HR_proj_2017&#39;, &#39;H_proj_2017&#39;, &#39;ER_proj_2017&#39;, &#39;TBF_proj_2017&#39;, &#39;BABIP_proj_2017&#39;, &#39;ERA_proj_2017&#39;, &#39;FIP_proj_2017&#39;, &#39;K/9_proj_2017&#39;, &#39;BB/9_proj_2017&#39;,  &#39;HR/9_proj_2017&#39;, &#39;ERA+_proj_2017&#39;]
+df_proj = df.loc[:, proj_varlist]
+x_train = df_proj.iloc[:, 1:]
+y_train = df_proj.iloc[:, :1]</code></pre>
+<p>Now I’ll fit a new model based on just the projection features.</p>
+<pre class="python"><code>m2 = LinearRegression()
+m2.fit(x_train,y_train)</code></pre>
+<pre><code>## LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None, normalize=False)</code></pre>
+<pre class="python"><code>m2.score(x_train,y_train)</code></pre>
+<pre><code>## 0.41267303195256966</code></pre>
+<p>An R^2 of 0.41 is lower than what I got before, but let’s compare the performance to the validation set. I’ll process it as above, and then score the model.</p>
+<pre class="python"><code>proj_vallist = [&#39;QS_2018&#39;, &#39;Age_2018&#39;, &#39;G_2018&#39;, &#39;GS_2018&#39;, &#39;IP_2018&#39;, &#39;K_2018&#39;, &#39;BB_2018&#39;, &#39;HR_2018&#39;, &#39;H_2018&#39;, &#39;ER_2018&#39;, &#39;TBF_2018&#39;, &#39;BABIP_2018&#39;, &#39;ERA_2018&#39;, &#39;FIP_2018&#39;, &#39;K/9_2018&#39;, &#39;BB/9_2018&#39;, &#39;HR/9_2018&#39;, &#39;ERA+_2018&#39;]
+val_proj = validation.loc[:, proj_vallist]
+x_val = val_proj.iloc[:, 1:]
+y_val = val_proj.iloc[:, :1]
+m2.score(x_val,y_val)</code></pre>
+<pre><code>## 0.36224662605542435</code></pre>
+<p>This R^2 is slightly better than the model using both projection and season data, and the gap between training and validation is a little closer. I can probably improve the model by removing a few features that aren’t helping to explain quality starts. I’ll use LassoCV to do the feature selection.</p>
+<p>In a nutshell, LassoCV “removes” any features that do not contribute to the model, by reducing the model’s coefficients to zero. If this doesn’t make sense to you, all you need to know is:</p>
+<ol style="list-style-type: decimal">
+<li>There are a lot of features in the current model.</li>
+<li>The model’s R^2 can improve if some of the unimportant features are removed.</li>
+<li>LassoCV can decide which features to remove.</li>
+</ol>
+<pre class="python"><code>m3 = LassoCV()
+m3.fit(x_train, y_train)</code></pre>
+<pre><code>## LassoCV(alphas=None, copy_X=True, cv=None, eps=0.001, fit_intercept=True,
+##         max_iter=1000, n_alphas=100, n_jobs=None, normalize=False,
+##         positive=False, precompute=&#39;auto&#39;, random_state=None,
+##         selection=&#39;cyclic&#39;, tol=0.0001, verbose=False)
+## 
+## /Users/angeline/.virtualenvs/r-reticulate/lib/python3.7/site-packages/sklearn/linear_model/_coordinate_descent.py:1088: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+##   y = column_or_1d(y, warn=True)</code></pre>
+<pre class="python"><code>m3.score(x_train, y_train)</code></pre>
+<pre><code>## 0.39871058029635065</code></pre>
+<pre class="python"><code>m3.score(x_val, y_val)</code></pre>
+<pre><code>## 0.393469978694043</code></pre>
+<p><img src="https://media.giphy.com/media/QNnqyyNFNA7As/giphy.gif" /></p>
+<p>It looks like it helped! The training data’s R^2 is 0.40, and the validation data’s R^2 is 0.39. That’s better than before, and the model appears to be performing similarly on both the training and validation, so it’s not overfitting.</p>
+<p>Now let’s try the model on the test set.</p>
+</div>
+<div id="scoring-the-model-on-the-test-set" class="section level4">
+<h4>Scoring the Model on the Test Set</h4>
+<p>Let’s bring in the test set and process it as we’ve done to the other datasets.</p>
+<pre class="python"><code>test = pd.read_csv(&#39;../data/post6/test_data_model.csv&#39;)
+proj_testlist = [&#39;QS_2019&#39;, &#39;Age_2019&#39;, &#39;G_2019&#39;, &#39;GS_2019&#39;, &#39;IP_2019&#39;, &#39;SO_2019&#39;, &#39;BB_2019&#39;, &#39;HR_2019&#39;, &#39;H_2019&#39;, &#39;ER_2019&#39;, &#39;TBF_2019&#39;, &#39;BABIP_2019&#39;, &#39;ERA_2019&#39;, &#39;FIP_2019&#39;, &#39;K/9_2019&#39;, &#39;BB/9_2019&#39;, &#39;HR/9_2019&#39;, &#39;ERA+_2019&#39;]
+test_proj = test.loc[:, proj_testlist]
+x_test = test_proj.iloc[:, 1:]
+y_test = test_proj.iloc[:, :1]</code></pre>
+<p>Let’s see how our model performs on the test data. Fingers crossed for 0.39…</p>
+<pre class="python"><code>m3.score(x_test, y_test)</code></pre>
+<pre><code>## 0.3175424713181816</code></pre>
+<p>Well! That didn’t turn out as planned.</p>
+<p><img src="https://media.giphy.com/media/l0K44J8VkKULaZkZi/giphy.gif" /></p>
+<p>The R^2 took a nosedive! What happened???</p>
+</div>
+</div>
+<div id="interpreting-the-model-results" class="section level3">
+<h3>Interpreting the Model Results</h3>
+<div id="quality-starts-through-the-years" class="section level4">
+<h4>Quality Starts Through the Years</h4>
+<p>Given that my training, validation and test data were split by year, it’s possible that there are yearly differences that can’t be captured by the model. I wanted to understand how quality starts may be different across the training (2017), validation (2018), and test (2019) data.</p>
+<pre class="python"><code>qs_17 = df[[&#39;QS_2017&#39;]]
+qs_18 = validation[[&#39;QS_2018&#39;]]
+qs_19 = test[[&#39;QS_2019&#39;]]
+allqs = pd.concat([qs_17, qs_18, qs_19], axis = 1)
+allqs2 = pd.melt(allqs, value_vars = [&#39;QS_2017&#39;, &#39;QS_2018&#39;, &#39;QS_2019&#39;])
+years = [&#39;2017&#39;, &#39;2018&#39;, &#39;2019&#39;]
+year_colors = [&#39;#002D72&#39;,&#39;#D50032&#39;, &#39;#AE8F6F&#39; ]
+color_dict = dict(zip(years, year_colors))
+sns.boxplot(x = &quot;variable&quot;, y = &quot;value&quot;, data = allqs2, showmeans = True, meanprops={&quot;marker&quot;:&quot;s&quot;,&quot;markerfacecolor&quot;:&#39;white&#39;, &quot;markeredgecolor&quot;:&quot;black&quot;}, color = &#39;#D50032&#39;)
+plt.xlabel(&#39;Year of Data&#39;)
+plt.xticks(range(0,3,1), (&quot;2017&quot;, &#39;2018&#39;, &#39;2019&#39;))</code></pre>
+<pre><code>## ([&lt;matplotlib.axis.XTick object at 0x1293f1ad0&gt;, &lt;matplotlib.axis.XTick object at 0x1293f1a90&gt;, &lt;matplotlib.axis.XTick object at 0x129442150&gt;], [Text(0, 0, &#39;2017&#39;), Text(0, 0, &#39;2018&#39;), Text(0, 0, &#39;2019&#39;)])</code></pre>
+<pre class="python"><code>plt.ylabel(&#39;Quality Starts&#39;)
+plt.title(&#39;Distribution of Quality Starts by Year&#39;)
+plt.show()</code></pre>
+<p><img src="/portfolio/2020-04-26-predicting-the-quality-start_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>Well, that certainly explains a lot. The mean (white square) and median (horizontal line in the red rectangle) number of quality starts overall has gradually decreased from 2017 to 2019. Naturally, if I’m training my model with data from 2017, it’s going to be bad at predicting something in 2019, since the year of data itself isn’t being captured by my model. Now that I understand that, I’ll look closer at the model results.</p>
+<pre class="python"><code>coeffs = pd.DataFrame(list(zip(x_test.columns, m3.coef_)))
+coeffs.columns = [&#39;feature&#39;, &#39;coefficient&#39;]
+coeffs = coeffs[coeffs.coefficient != 0]
+fig, ax = plt.subplots(figsize = (8, 5))
+coeffs.plot(x = &#39;feature&#39;, y = &#39;coefficient&#39;, kind= &#39;bar&#39;, ax = ax, color = &#39;none&#39;, legend = False)
+ax.scatter(x = np.arange(coeffs.shape[0]), marker = &#39;s&#39;, s = 100, y=coeffs[&#39;coefficient&#39;], color = &#39;#002D72&#39;)
+ax.axhline(y = 0, linestyle = &#39;-&#39;, color = &#39;#D50032&#39;, linewidth = 2)
+_ = ax.set_xticklabels([&#39;Age&#39;, &#39;Games&#39;, &#39;Games \n Started&#39;, &#39;Innings \nPitched&#39;, &#39;Strikeouts&#39;, &#39;Walks&#39;, &#39;Home \n Runs&#39;, &#39;Total \n Batters \n Faced&#39;, &#39;Earned \n Runs \nAverage+&#39;], rotation=30, fontsize=11)
+plt.xlabel(&#39;Feature&#39;)</code></pre>
+<pre><code>## Text(0.5, 0, &#39;Feature&#39;)</code></pre>
+<pre class="python"><code>plt.ylabel(&#39;Model Coefficient&#39;)</code></pre>
+<pre><code>## Text(0, 0.5, &#39;Model Coefficient&#39;)</code></pre>
+<pre class="python"><code>plt.title(&#39;Coefficients by Feature&#39;)</code></pre>
+<pre><code>## Text(0.5, 1.0, &#39;Coefficients by Feature&#39;)</code></pre>
+<pre class="python"><code>plt.tight_layout()
+plt.show()</code></pre>
+<p><img src="/portfolio/2020-04-26-predicting-the-quality-start_files/figure-html/unnamed-chunk-22-1.png" width="768" /></p>
+<p>This is a plot of the model coefficients. Coefficients that are furthest away from zero (the red line) have the greatest impact on quality starts. For instance, it looks like each additional year in pitcher age adds 0.2 quality starts. This could be due to better efficiency that comes with more experience. The other coefficients also make sense: home runs are bad for quality starts, so the coefficient is negative, and more games started means more potential for quality starts. A higher ERA plus (the opposite of ERA) goes with better pitching. These coefficients do a reasonable job of describing the relationship between the features and the target.</p>
+<p>I also want to explore which players the model had the most trouble with, so I will adjust the dataframe to include the model’s predicted Quality Starts.</p>
+<pre class="python"><code>test_proj_predict = test.loc[:, [&#39;Full_Name&#39;, &#39;ID&#39;, &#39;QS_2019&#39;, &#39;Age_2019&#39;, &#39;G_2019&#39;, &#39;GS_2019&#39;, &#39;IP_2019&#39;, &#39;SO_2019&#39;, &#39;BB_2019&#39;, &#39;HR_2019&#39;, &#39;H_2019&#39;, &#39;ER_2019&#39;, &#39;TBF_2019&#39;, &#39;BABIP_2019&#39;, &#39;ERA_2019&#39;, &#39;FIP_2019&#39;, &#39;K/9_2019&#39;, &#39;BB/9_2019&#39;, &#39;HR/9_2019&#39;, &#39;ERA+_2019&#39;]]
+test_proj_predict[&#39;predicted_2019_QS&#39;] = m3.predict(x_test)
+test_proj_predict[&#39;prediction_residuals&#39;] = test_proj_predict[&#39;QS_2019&#39;]-test_proj_predict[&#39;predicted_2019_QS&#39;]</code></pre>
+<p>I looked at pitchers with the highest residuals (or, difference between prediction and reality), to understand where the model failed. Which players was I totally wrong about in 2019?</p>
+<pre class="python"><code>test_proj_predict[test_proj_predict.prediction_residuals &gt; 10][[&#39;Full_Name&#39;, &#39;Age_2019&#39;, &#39;QS_2019&#39;, &#39;predicted_2019_QS&#39;, &#39;prediction_residuals&#39;]].sort_values(&#39;prediction_residuals&#39;, ascending = False).set_index(&#39;Full_Name&#39;).head()</code></pre>
+<pre><code>##                    Age_2019  QS_2019  predicted_2019_QS  prediction_residuals
+## Full_Name                                                                    
+## Hyun-Jin Ryu             32       22           7.085192             14.914808
+## Lucas Giolito            24       17           5.306966             11.693034
+## Marco Gonzales           27       19           7.804383             11.195617
+## Shane Bieber             24       24          13.043954             10.956046
+## Madison Bumgarner        29       20           9.045565             10.954435</code></pre>
+<p>The model underpredicted pitchers who were injured the previous year, and then bounced back (like Ryu and Bumgarner), or young pitchers who didn’t have a lot of historical data (Bieber or Gonzales) or underwent a dramatic change in mechanics (Giolito).</p>
+<pre class="python"><code>test_proj_predict[test_proj_predict.prediction_residuals &lt; -10][[&#39;Full_Name&#39;, &#39;Age_2019&#39;, &#39;QS_2019&#39;, &#39;predicted_2019_QS&#39;, &#39;prediction_residuals&#39;]].sort_values(&#39;prediction_residuals&#39;, ascending = False).set_index(&#39;Full_Name&#39;).head()</code></pre>
+<pre><code>##                  Age_2019  QS_2019  predicted_2019_QS  prediction_residuals
+## Full_Name                                                                  
+## Zack Godley            29        1          11.371187            -10.371187
+## Chad Green             28        0          11.856986            -11.856986
+## Carlos Carrasco        32        2          16.356610            -14.356610
+## Luis Severino          25        0          15.820294            -15.820294
+## Corey Kluber           33        2          19.725951            -17.725951</code></pre>
+<p>The model overpredicted for two pitchers who had lots of injuries in 2019 (Kluber, Severino), and one who was diagnosed with leukemia (Carrasco). These events are tougher to predict, so it’s reasonable that the model failed here.</p>
+</div>
+</div>
+<div id="wrapping-it-all-up" class="section level3">
+<h3>Wrapping It All Up</h3>
+<p>As a final analysis, I’ll calculate mean absolute error, which tells me on average, how off my model was.</p>
+<pre class="python"><code>def MAE(actuals, preds):
+    return np.mean(np.abs(actuals-preds))
+
+MAE(test_proj_predict.QS_2019,test_proj_predict.predicted_2019_QS)</code></pre>
+<pre><code>## 4.5048492504957505</code></pre>
+<p>To sum it all up, given the differences in quality starts across years, a time-series analysis may have been better suited to predict quality starts.</p>
+<p><img src="https://media.giphy.com/media/WocDy1iZ3AudkEcg8g/giphy.gif" /></p>
+<p>The model did identify a few features that are useful for understanding quality starts, namely, age, and home runs. It was a horrible failure at predicting some difficult to predict events like injuries and bounce backs, but overall, it was off by 4-5 quality starts a year. This is close enough for me, since I was working with no projection at all, but this may be too unreliable for others. I will include this in my z-score rankings for the next draft, and we’ll see how it goes! Stay tuned.</p>
+</div>

@@ -2,7 +2,6 @@
 title: Webscraping Baseball Data using Python
 author: Angeline Protacio
 date: '2020-04-12'
-weight: 1
 slug: webscraping
 output:
   blogdown::html_page:
@@ -16,7 +15,7 @@ tags:
   - fantasy
   - ggplot2
   - Quality_Start
-description: "An ephemeral method to collect baseball data when there isn't a relevant API or library with your data"
+description: "An ephemeral method to collect baseball data"
 image: "img/portfolio/manarola.jpg"
 ---
 
@@ -266,7 +265,7 @@ This example for scraping Baseball Reference can be used to scrape data for mult
 
 ### Wrap Up
 
-I wrote a few functions that employ the principles described, that can be used to scrape the relevant pages on Fangraphs and Baseball Reference. These functions can be found on my [github repo](https://github.com/angelinepro/baseball_scraping). A word of caution about webscraping: these methods work so long as the webpage remains the same. Once the webpage is updated, some of the specific locations for the text of interest may also need to be updated, and the functions may need to be updated. 
+I wrote a few functions that employ the principles described, that can be used to scrape the relevant pages on Fangraphs and Baseball Reference. These functions can be found on my [github repo](https://github.com/angelinepro/portfolio_supplemental/tree/master/webscraping). A word of caution about webscraping: these methods work so long as the webpage remains the same. Once the webpage is updated, some of the specific locations for the text of interest may also need to be updated, and the functions may need to be updated. 
 
 Thanks for reading! I'll be continuing to post about what I'm learning while at Metis, so stay tuned.
 

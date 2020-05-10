@@ -17,20 +17,16 @@ image: "img/portfolio/tulip.jpg"
 description: "WAR: a poor choice"
 ---
 
-###Where were we?
+### Where were we?
 If you're reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading [this](/../portfolio/drafting-batters-part-1) first. 
 <br>
 </br>
 In the last two posts, I wrote about [my draft strategy using projected WAR](/../portfolio/drafting-batters-part-1), and [explored fantasy talent by defensive position](/../portfolio/drafting-batters-part-2). I discovered that [WAR](https://www.fangraphs.com/library/misc/war/) (Wins Above Replacement) was not a great way to select players given my league's scoring categories. In the absence of a summary statistic to guide my decisions, I looked at all of the scoring categories. I was pretty frazzled by the end of the draft.
 
-<center>
 <img src="https://media.giphy.com/media/1jl173guBKkbvC03rQ/giphy.gif", style="width:450px;"></img>
-</center>
-<br/><br/> 
 
 
-
-###A better strategy
+### A better strategy
 
 In doing research for this post, I found this [article](https://fantasysixpack.net/creating-fantasy-baseball-player-rater/) on setting up my own rankings based on my league scoring categories, using z-scores. It's a simple statistic that identifies what players are above the mean, and by how much. This is so simple, I was kicking myself for using it on draft day. Here's how it works.
 
@@ -48,7 +44,7 @@ batters <- map2_df(pos_files, pos_names, load_data) %>%
   select(Name, Team, playerid, position, PA, R, HR, RBI, SB, OPS, SO, WAR)
 ```
 
-####Create Z-Scores
+#### Create Z-Scores
 
 ```{r create_z, warning = FALSE, message = FALSE}
 bat_z <- batters %>%
@@ -72,7 +68,7 @@ Once I filtered based on that criteria, I calculated the [mean](https://www.khan
 
 So now let's look at our top players.
 
-####Who's on top?
+#### Who's on top?
 
 ```{r top-WAR-z}
 bat_z %>% 
@@ -84,22 +80,14 @@ bat_z %>%
 
 Trout's on top, not surprisingly. 
 
-<br/> </br>
-<center>
 <img src="https://media.giphy.com/media/69jvQP1nAJcuDHXOY2/giphy.gif", style="width:450px;"></img>
-</center>
-<br/><br/> 
-
 
 There is considerable overlap between this list of names and players with high projected WAR, but now this list accounts for projected stolen bases, and projected strikeouts. This is much easier to keep track of in the moment. 
 
 Forgive the digression, but I'm still beating myself up about Buster Posey. 
 
-<center>
-<img src="https://media.giphy.com/media/FTu9FexqezV9C/giphy.gif", style="width:450px;"></img>
-</center>
-<br/><br/> 
 
+<img src="https://media.giphy.com/media/FTu9FexqezV9C/giphy.gif", style="width:450px;"></img>
 
 Going back to the question I explored in the [last post](/../portfolio/drafting-batters-part-2) about positional talent, would I have had a different pool of talent to choose from if I'd looked at z-scores instead of WAR?
 
@@ -140,7 +128,7 @@ Given that no one who ranked above him was available in my league by the eighth 
 
 Now that I know using z-scores would have changed my picks for catcher and shortstop (but not second base), I'm going to look at z-scores for the rest of my draft picks. 
 
-####My draft picks
+#### My draft picks
 Below, I filtered the full dataset to only include players I drafted. For reference, my team name is "Dropped Third Strike", after the [obscure baseball rule](https://sabr.org/research/dropped-third-strike-life-and-times-rule) (shortened here to DTS for object-naming). I added in information on draft order as well.
 ```{r my-draft-picks, warning=FALSE}
 DTS_bat <- as.data.frame(cbind(c("Mookie Betts", "Buster Posey", "Andrelton Simmons", "Edwin Encarnacion", "Rougned Odor", "Mike Moustakas", "Adam Jones", "Manuel Margot", "Brandon Crawford", "Max Kepler", "Brandon Belt", "Stephen Piscotty", "Maikel Franco", "Jose Peraza"), c(01, 02, 04, 05, 08, 11, 12, 13, 18, 20, 21, 23, 24, 25)))
@@ -154,14 +142,11 @@ drafted %>%
 
 I ended up drafting four batters with negative projected z-scores (meaning they are projected to perform below average): Margot, Crawford, Piscotty, and Peraza. And fandom bias strikes again, because I drafted three Giants, and one player from every other team. I already mentioned that Buster Posey was not the best pick at the catcher's position, but I also ended up picking up Crawford, who had mediocre to bad projected z-scores for many scoring categories. This was a bad pick, and I ended up dropping him early in the season.
 
-![](https://media.giphy.com/media/lloFKP79zGtY4/giphy.gif)
-
-<br>
-</br>
+<img src="https://media.giphy.com/media/lloFKP79zGtY4/giphy.gif" />
 
 I'm a little surprised by Franco, who has a rather high z-score for being available until the 24th round, and Belt for the same reason (21st round). 
 
-###Up Next
+### Up Next
 In the [next](/../portfolio/drafting-batters-part-4) post, I'll wrap this up and look at how my players actually did, comparing the projection to the final 2018 data. Which players were truly bad picks? Who outperformed their projection? Stay tuned!
 
 [Drafting Batters in Fantasy Baseball, Part 4](/../portfolio/drafting-batters-part-4)

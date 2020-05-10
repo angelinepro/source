@@ -20,7 +20,7 @@ image: "img/portfolio/canals.jpg"
 <br>
 </br>
 
-###Where were we?
+### Where were we?
 If you're reading about my fantasy baseball experience for the first time, welcome! You may be better oriented by reading [this post](/../portfolio/drafting-batters-part-1) first. 
 <br>
 </br>
@@ -80,12 +80,9 @@ In summary, it looks like outfielders, first basemen, and third basemen are proj
 
 Let's go back to the idea of drafting from positions with a shortage of offense. From a scarcity point of view, it makes sense, since every team needs to have at least one catcher and one shortstop. Given that, maybe it was reasonable that I ended up with Posey and Simmons. It's unfair to compare catchers and shortstops to outfielders I could have picked up in the early stages. Maybe Posey and Simmons represent the best offensive talent at their position, given what was available at the time. Maybe.
 
-<center>
-<img src="https://media.giphy.com/media/oKdjMdWXl9ys8/giphy.gif", style="width:300px;"></img>
-</center>
-<br/><br/> 
+![](https://media.giphy.com/media/oKdjMdWXl9ys8/giphy.gif)
 
-###Should I invest in a time machine?
+### Should I invest in a time machine?
 
 So this is where I start to beat myself up a little bit. Did I really make the best decision at the time, given my logic? Now that I'm able to take my time and reflect, I know that WAR isn't a great way to select players. But given what I knew, was it reasonable to pick Posey as a catcher in the second round?
 
@@ -99,10 +96,8 @@ batters %>%
 
 Even using WAR as a metric to guide decisions, I might have been better off picking up Gary Sanchez for his overall projected offensive numbers. His strikeouts are a problem, but I could take wins in three categories for a loss in one. He was available at this point in the draft, but I chose Posey instead.
 
-<center>
-<img src="https://media.giphy.com/media/gnJgBlPgHtcnS/giphy.gif", style="width:300px;"></img>
-</center>
-<br/><br/> 
+![](https://media.giphy.com/media/gnJgBlPgHtcnS/giphy.gif)
+
 
 What about for shortstops?
 ```{r short_runs}
@@ -116,13 +111,9 @@ Correa, Seager, Lindor and Turner were all drafted before my pick in the fourth 
 
 So, given what I knew at the time, Simmons was not a bad pick. Posey, however, was not the smartest choice. As a Giants fan playing her first season of fantasy baseball, I know it would have killed me a little inside if someone else had picked him up before I did. My fandom caused me to make a bad decision in the second round of the draft. It's a good reminder to keep fandom out of fantasy baseball (or at least use the stats to support your bias).
 
-<center>
-<img src="https://media.giphy.com/media/3o6Zt1TrXW8uW2lE2I/giphy.gif", style="width:300px;"></img>
-</center>
+![](https://media.giphy.com/media/3o6Zt1TrXW8uW2lE2I/giphy.gif)
 
-<br></br>
-
-###Up next
+### Up next
 In the [next](/../portfolio/drafting-batters-part-3) post, I'll discuss another strategy that would have been less stressful, and more geared toward my specific league goals. Stay tuned!
 
 <br/><br/> 

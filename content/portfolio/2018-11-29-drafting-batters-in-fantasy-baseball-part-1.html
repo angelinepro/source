@@ -33,10 +33,7 @@ image: "img/portfolio/hyacinth.jpg"
 <div id="my-first-season-in-fantasy-baseball" class="section level3">
 <h3>My first season in fantasy baseball</h3>
 <p>I joined a fantasy baseball league for the first time this year, which may come as a shock to those of you who know that I love both baseball and data. I was in a fantasy basketball league a few years ago, but because I haven’t watched basketball seriously in about 15 years, these were two very unsatisfying seasons. I was hoping it would encourage me to watch more basketball, but instead I made zero moves, stubbornly refused to trade Kevin Durant, and effectively set my league fees on fire.</p>
-<div class="figure">
-<img src="https://media.giphy.com/media/5aoTMpLEIxlfi/giphy.gif" />
-
-</div>
+<p><img src="https://media.giphy.com/media/5aoTMpLEIxlfi/giphy.gif" /></p>
 <p>Unsurprisingly, this strategy did not help me win.</p>
 <p>Finally, this year, a friend invited me to join his newly founded fantasy baseball league. The fees were a bit steep ($50), and I didn’t really make much progress in my prior fantasy leagues, but I decided to join up anyway. I actually watch baseball, and this seemed like a better incentive to learn how to play fantasy sports. So I signed up, with a vague sense that I was about to go down the <a href="https://media.giphy.com/media/4BgQaxfQfeqys/giphy.gif">rabbit hole</a>.</p>
 <p>There are a lot of parts to Fantasy Baseball, so I’m going to break this up into several posts. This series will focus on batters. I’m going to start this post with a brief introduction to Fantasy Baseball (geared toward those with little to no experience, and a limited understanding of baseball), this year’s draft strategy for batters, and reflections on the metrics I used. The second post will dive a little deeper into positional talent, and how that relates to the metrics I used. The third post will detail an alternate draft strategy, where I beat myself up about the drafting decisions I made. In the fourth post, I’ll look at the success of the team I drafted, and what I could have done differently. In each post, I included the R code I used to explore the player data and to develop a draft strategy, in case you are interested in implementing some of this analysis on your own. It’s also in my <a href="https://github.com/angelinepro/source/tree/master/content">github repo</a>.</p>
@@ -156,7 +153,8 @@ image: "img/portfolio/hyacinth.jpg"
 </table>
 <p>Drafted players are now on your team, but you can drop players who aren’t contributing, and add free agents who aren’t currently on a team throughout the season. You can also trade with other teams for players you want, up until the trade deadline.</p>
 <p>The draft is important because this may be the only opportunity to pick up high performing players. Players like Mike Trout, or Mookie Betts, for instance, are unlikely to be dropped or traded, barring injury or disaster. It’s important to go into the draft with a strategy, or at least, some idea of how you want to select players. I’d previously spent maybe two hours preparing for my Fantasy Basketball drafts, so I thought this time, I’d devote an afternoon to it. This was not enough time, in hindsight.</p>
-<p><img src="https://media.giphy.com/media/3o7TKpWMuZga6QURwI/giphy.gif" /> <br/><br/></p>
+<p><img src="https://media.giphy.com/media/3o7TKpWMuZga6QURwI/giphy.gif" />
+<br/><br/></p>
 </div>
 <div id="how-i-prepared-for-the-draft" class="section level3">
 <h3>How I prepared for the draft</h3>
@@ -418,7 +416,9 @@ batters %&gt;%
 </table>
 <p>A lot of these players had also been drafted, but of the ones remaining, I picked Buster Posey in the second round for his high WAR, and his low number of strikeouts relative to everyone else in his group. Andrelton Simmons was my fourth round pick for a similar reason, with more stolen bases.</p>
 <p>Seems good so far, right?</p>
-<p><img src="https://media.giphy.com/media/l0MYDpc4QeyN2Dmqk/giphy.gif" /> <br/><br/> As I mentioned above, WAR relies on more than just the scoring categories I care about. In fact, looking at Posey and Simmons, their projections for the scoring categories are low relative to other players with a similar WAR. They are on the lower end for scoring runs (R), hitting homeruns (HR), runs batted in (RBI), and getting on base/hitting for extra bases (OPS).</p>
+<p><img src="https://media.giphy.com/media/l0MYDpc4QeyN2Dmqk/giphy.gif" />
+<br/><br/>
+As I mentioned above, WAR relies on more than just the scoring categories I care about. In fact, looking at Posey and Simmons, their projections for the scoring categories are low relative to other players with a similar WAR. They are on the lower end for scoring runs (R), hitting homeruns (HR), runs batted in (RBI), and getting on base/hitting for extra bases (OPS).</p>
 <pre class="r"><code>batters %&gt;% 
   filter(qt_WAR == 49) %&gt;% 
   select(position, Name, R, HR, RBI, SO, SB, OPS, WAR) %&gt;%
@@ -595,7 +595,8 @@ batters %&gt;%
 </tbody>
 </table>
 <p>Picking these two in the second and fourth round, in hindsight, was not the best idea. In fact, it may not make sense to use WAR to differentiate between players in the early rounds because there is a high opportunity cost to missing out on strong offensive players that actually contribute to my scoring categories. Sorry, Buster.</p>
-<p><img src="https://media.giphy.com/media/WeMQzWA2aiJuU/giphy.gif" /> <br/><br/></p>
+<p><img src="https://media.giphy.com/media/WeMQzWA2aiJuU/giphy.gif" />
+<br/><br/></p>
 </div>
 <div id="warning-signs" class="section level4">
 <h4>WARning signs</h4>
@@ -625,10 +626,7 @@ ggplot(batters %&gt;%
 <h4>WAR is not the answer (good god, y’all)</h4>
 <p>It looks like WAR isn’t great for identifying players that would help win my scoring categories, and it’s not at all related to stealing bases or striking out. I shouldn’t rely on this overall summary category to guide my decisions. Instead, perhaps it’d be more useful to rank players based on their projected performance for each scoring category. The performance in the scoring categories is ultimately what matters, and what will decide whether my team wins the matchup that week.</p>
 <p>At this point in the draft, I changed strategies, and split players into quantiles by 50 again, and ranked each scoring category separately. This time, I filtered results to players who were in the top 4% of projections for runs, home runs, runs batted in, and on base plus slugging. I limited it to these four scoring categories because no player was in the top 4% for all six, and only Mike Trout was in the top 4% for these four categories plus base stealing.</p>
-<div class="figure">
-<img src="https://media.giphy.com/media/YWoB4KtzoBDu39C6DQ/giphy.gif" />
-
-</div>
+<p><img src="https://media.giphy.com/media/YWoB4KtzoBDu39C6DQ/giphy.gif" /></p>
 <p>While I’m sure it’s useful to know how great Mike Trout is, he was already picked up by some other team at this point. Nothing to see here.</p>
 <p>So which players are the cream of the crop for my four scoring categories?</p>
 <pre class="r"><code>batters &lt;- batters %&gt;%
@@ -770,10 +768,7 @@ batters %&gt;%
 </tbody>
 </table>
 <p>This group is in the top 4% of projections for runs, home runs, runs batted in, and OPS. This would have been a solid group to start with. I started seleting players based on this strategy and loosened the filtering criteria as we got further along in the draft. I also made sure to occasionally select players who were projected to have more stolen bases and fewer strikeouts. This strategy requires a lot of analysis in the moment, which can lead to a very stressful three hour draft.</p>
-<div class="figure">
-<img src="https://media.giphy.com/media/l1KVaj5UcbHwrBMqI/giphy.gif" />
-
-</div>
+<p><img src="https://media.giphy.com/media/l1KVaj5UcbHwrBMqI/giphy.gif" /></p>
 <p>In hindsight, I would have been better off spending more than an afternoon strategizing. I have regrets.</p>
 <p><br/><br/></p>
 </div>
