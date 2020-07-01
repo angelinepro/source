@@ -37,7 +37,7 @@ description: "Linear regression with scikit-learn"
 </div>
 <div id="getting-the-data" class="section level3">
 <h3>Getting the Data</h3>
-<p>I already wrote a <a href="/../portfolio/webscraping">post</a> about scraping data from Fangraphs and Baseball Reference. I saved all of the data as .csv files by year. I did a bit of data cleaning which I’m not going to spend a lot of time on, but if you’re curious, you can find my code <a href="https://github.com/angelinepro/portfolio_supplemental/tree/master/predicting_quality_starts">here</a>. A few highlights of data cleaning: I discovered that there are some jokers at Fangraphs who decided to enter projections for “Rob W00t3n”, rather than “Rob Wooten”, sometimes, a space isn’t just a space, but a “\xa0” character, and there’s a lot of non-unique names in baseball.</p>
+<p>I already wrote a <a href="/../portfolio/webscraping">post</a> about scraping data from Fangraphs and Baseball Reference. I saved all of the data as .csv files by year. I did a bit of data cleaning which I’m not going to spend a lot of time on, but if you’re curious, you can find my code <a href="https://github.com/angelinepro/predicting_quality_starts/tree/master/analysis">here</a>. A few highlights of data cleaning: I discovered that there are some jokers at Fangraphs who decided to enter projections for “Rob W00t3n”, rather than “Rob Wooten”, sometimes, a space isn’t just a space, but a “\xa0” character, and there’s a lot of non-unique names in baseball.</p>
 <blockquote class="twitter-tweet">
 <p lang="en" dir="ltr">
 Tonight I watched Will Smith, catcher, make the final out on a dropped third strike thrown by Will Smith, pitcher, while my husband hummed the theme to the Wild Wild West, sung by Will Smith, rapper.
@@ -121,7 +121,7 @@ plt.show()</code></pre>
 <h3>Modeling</h3>
 <div id="training-data" class="section level4">
 <h4>Training Data</h4>
-<p>I started modeling by looking at all the features in the training data and selecting a few that I’d expect to have an impact on quality starts. The features selected were based on correlation with the target, and studying pairplots. My initial list included innings pitched, games started, team wins in games started, game score, and a few others. You can compare the list below to the glossary at <a href="https://github.com/angelinepro/portfolio_supplemental/tree/master/predicting_quality_starts">Baseball Reference</a>, and <a href="https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml">Fangraphs</a> to understand the full list of the features I selected. Then, I dropped any rows with missing values, since my prediction model won’t like that.</p>
+<p>I started modeling by looking at all the features in the training data and selecting a few that I’d expect to have an impact on quality starts. The features selected were based on correlation with the target, and studying pairplots. My initial list included innings pitched, games started, team wins in games started, game score, and a few others. You can compare the list below to the glossary at <a href="https://github.com/angelinepro/predicting_quality_starts/tree/master/analysis">Baseball Reference</a>, and <a href="https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml">Fangraphs</a> to understand the full list of the features I selected. Then, I dropped any rows with missing values, since my prediction model won’t like that.</p>
 <pre class="python"><code>varlist3 = [&#39;QS_2017&#39;, &#39;IP_2016&#39;, &#39;GS_2016&#39;, &#39;Wgs_2016&#39;, &#39;Wtm_2016&#39;,  &#39;QS_2016&#39;, &#39;GmScA_2016&#39;, &#39;Best_2016&#39;, &#39;lDR_2016&#39;, &#39;IP/GS_2016&#39;, &#39;Pit/GS_2016&#39;, &#39;100-119_2016&#39;, &#39;Max_2016&#39;, &#39;IP_proj_2017&#39;, &#39;K_proj_2017&#39;, &#39;ERA_proj_2017&#39;, &#39;FIP_proj_2017&#39;, &#39;zWAR_proj_2017&#39;]
 df_nona = df.loc[:,varlist3].dropna()
 df_nona.shape</code></pre>
@@ -248,7 +248,7 @@ color_dict = dict(zip(years, year_colors))
 sns.boxplot(x = &quot;variable&quot;, y = &quot;value&quot;, data = allqs2, showmeans = True, meanprops={&quot;marker&quot;:&quot;s&quot;,&quot;markerfacecolor&quot;:&#39;white&#39;, &quot;markeredgecolor&quot;:&quot;black&quot;}, color = &#39;#D50032&#39;)
 plt.xlabel(&#39;Year of Data&#39;)
 plt.xticks(range(0,3,1), (&quot;2017&quot;, &#39;2018&#39;, &#39;2019&#39;))</code></pre>
-<pre><code>## ([&lt;matplotlib.axis.XTick object at 0x132cf1a10&gt;, &lt;matplotlib.axis.XTick object at 0x132cf19d0&gt;, &lt;matplotlib.axis.XTick object at 0x132d2a4d0&gt;], [Text(0, 0, &#39;2017&#39;), Text(0, 0, &#39;2018&#39;), Text(0, 0, &#39;2019&#39;)])</code></pre>
+<pre><code>## ([&lt;matplotlib.axis.XTick object at 0x12d5a0cd0&gt;, &lt;matplotlib.axis.XTick object at 0x12d5a0c90&gt;, &lt;matplotlib.axis.XTick object at 0x12d5f1210&gt;], [Text(0, 0, &#39;2017&#39;), Text(0, 0, &#39;2018&#39;), Text(0, 0, &#39;2019&#39;)])</code></pre>
 <pre class="python"><code>plt.ylabel(&#39;Quality Starts&#39;)
 plt.title(&#39;Distribution of Quality Starts by Year&#39;)
 plt.show()</code></pre>

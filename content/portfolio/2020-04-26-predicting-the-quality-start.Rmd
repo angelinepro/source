@@ -354,6 +354,6 @@ The model did identify a few features that are useful for understanding quality 
 
 [1]: /../portfolio/drafting-batters-part-3
 [2]: /../portfolio/webscraping
-[3]: https://github.com/angelinepro/portfolio_supplemental/tree/master/predicting_quality_starts
+[3]: https://github.com/angelinepro/predicting_quality_starts/tree/master/analysis
 [4]: https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml
 [5]: https://library.fangraphs.com/pitching/complete-list-pitching/
