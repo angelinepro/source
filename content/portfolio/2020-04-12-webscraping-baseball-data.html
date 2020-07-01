@@ -31,180 +31,79 @@ image: "img/portfolio/manarola.jpg"
 
 <div id="why-scrape-baseball-data" class="section level3">
 <h3>Why Scrape Baseball Data?</h3>
-<p>I recently enrolled in a data science bootcamp at Metis. Throughout the 12 weeks of the bootcamp, we work on five different projects to apply what we’ve learned thus far. One of the current projects includes webscraping data to use for predictive modeling. I opted to try my luck at scraping data from Fangraphs and Baseball Reference, neither of which have APIs that make it easy to get their data. As part of my desire to get better at fantasy baseball, I have also been exploring how to get historical projection data, which is available from Fangraphs, and is otherwise trickier to find using existing baseball Python and R libraries, so this was a good opportunity to source that data.</p>
-<p>I wrote this post to detail my methods for getting historical pitching projection data from Fangraphs, and pitching season data from Baseball Reference. Along the way, I’ll introduce the Python tools I used, and offer a few insights about scraping in general. Let’s begin.</p>
+<p>In my desire to improve my fantasy team, I realized I was lacking data on quality starts, and thought it would be good to <a href="/../portfolio/quality-starts">predict this</a>. Before I could start modeling, I needed historical season data and projections, to form the basis for my training, validation, and test data. I planned to get this all from Baseball Reference and Fangraphs, neither of which has an API that makes it easy to get their data.</p>
+<p>I wrote this post to describe my methods for webscraping projection data from Fangraphs, and season data from Baseball Reference. Along the way, I’ll introduce the Python tools I used, and offer a few insights about scraping in general. If you want to use my code to implement your own webscraper, you will find that, along with a more detailed write-up at my <a href="https://github.com/angelinepro/predicting_quality_starts/tree/master/webscraping">github repo</a>.</p>
+<p>A word of caution about webscraping: these methods work so long as the webpage remains the same (hence the word ‘ephemeral’ in the post description). Once the webpage is updated, some of the specific locations for the text of interest may also need to be updated, and the functions may need to be updated.</p>
 </div>
 <div id="scraping-fangraphs" class="section level3">
 <h3>Scraping Fangraphs</h3>
-<p>Let’s import some relevant python libraries. I’m going to use the requests library to send HTTP requests. This is the part of webscraping that actually interacts with the website and brings data back. I’ll use BeautifulSoup to parse the HTML that comes back, so it’s easier to get the data I care about. I’m also going to load pandas for putting the data into dataframes once I’ve collected it.</p>
-<pre class="python"><code>from bs4 import BeautifulSoup
-import requests
-import pandas as pd</code></pre>
-<p>The first thing that we’ll do is get the website source, parse it with BeautifulSoup, and see what that looks like.</p>
-<pre class="python"><code>response = requests.get(&#39;http://www.fangraphs.com/blogs/2017-zips-projections-baltimore-orioles&#39;)
-orioles_soup = BeautifulSoup(response.text, &#39;html.parser&#39;)
-
-result = orioles_soup.prettify().splitlines()
-print(result[:20])</code></pre>
-<pre><code>## [&#39;&lt;!DOCTYPE html&gt;&#39;, &#39;&lt;html&gt;&#39;, &#39; &lt;head&gt;&#39;, &#39;  &lt;meta content=&quot;text/html; charset=utf-8&quot; http-equiv=&quot;Content-Type&quot;/&gt;&#39;, &#39;  &lt;title&gt;&#39;, &#39;   2017 ZiPS Projections – Baltimore Orioles | FanGraphs Baseball&#39;, &#39;  &lt;/title&gt;&#39;, &#39;  &lt;meta content=&quot;WordPress 5.4.1&quot; name=&quot;generator&quot;/&gt;&#39;, &#39;  &lt;!-- leave this for stats --&gt;&#39;, &#39;  &lt;meta content=&quot;Daily baseball statistical analysis and commentary.&quot; name=&quot;description&quot;/&gt;&#39;, &#39;  &lt;meta content=&quot;baseball analysis, baseball blog, baseball statistics&quot; name=&quot;keywords&quot;/&gt;&#39;, &#39;  &lt;link href=&quot;https://blogs.fangraphs.com/feed/&quot; rel=&quot;alternate&quot; title=&quot;RSS 2.0&quot; type=&quot;application/rss+xml&quot;/&gt;&#39;, &#39;  &lt;link href=&quot;https://blogs.fangraphs.com/feed/rss/&quot; rel=&quot;alternate&quot; title=&quot;RSS .92&quot; type=&quot;text/xml&quot;/&gt;&#39;, &#39;  &lt;link href=&quot;https://blogs.fangraphs.com/feed/atom/&quot; rel=&quot;alternate&quot; title=&quot;Atom 0.3&quot; type=&quot;application/atom+xml&quot;/&gt;&#39;, &#39;  &lt;link href=&quot;https://blogs.fangraphs.com/xmlrpc.php&quot; rel=&quot;pingback&quot;/&gt;&#39;, &#39;  &lt;!-- &lt;link href=&quot;//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css&quot; rel=&quot;stylesheet&quot;&gt; --&gt;&#39;, &#39;  &lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;   &lt;!--&#39;, &#39;function popitup(url) {&#39;, &quot;\tnewwindow=window.open(url,&#39;name&#39;,&#39;height=200,width=150&#39;);&quot;]</code></pre>
-<p>It looks like html, but boy is it a mess! I’ve only printed the first 20 lines here, but it can be very overwhelming to see all of this at once. To provide some guidance on what part of it we actually want to scrape, I’m going to use my browser to identify the table of interest, and inspect the page so I can narrow down where it is. I’m particularly interested in the pitching data, so I’m going to focus on the table that says “Counting Stats”.</p>
-<p><img src="/img/scraping/counting_stats_table.png" /></p>
-<p>And if I right click the table with my mouse and click “Inspect”, this pops up:</p>
+<div id="getting-the-source-code" class="section level4">
+<h4>Getting the Source Code</h4>
+<p>To scrape Fangraphs, I used the <strong>requests</strong> and <strong>BeautifulSoup</strong> libraries, along with <strong>re</strong> to use regular expressions to find and extract the data I need from the source code, and <strong>pandas</strong> to put it all into dataframes.</p>
+<p>Fangraphs does not have dynamic content, which makes scraping their page possible with just the libraries above. For pages with dynamic content, like Baseball Reference, I needed to use <strong>Selenium</strong>, which I will cover later.</p>
+<p>I have webscraped a few different sites, and some are friendlier to scrapers than others. While puzzling through my code to extract just the right part, or writing it iteratively in small pieces, I’ve submitted one too many requests to get the source, resulting in the site unceremoniously blocking me, preventing any further scraping activity. To avoid this, I usually start small, scraping one or two pages from the same site, and saving the source so I could work out my regular expressions separately, without submitting more requests.</p>
+<p>For example, the function below takes a list of urls (I usually use 2-3 urls) as an argument, and appends the source from each url to a list.</p>
+<pre class="python"><code>def get_data(urls):
+    response = []
+    for i in urls:
+        response.append(requests.get(i))
+    return response</code></pre>
+<p>From this, I can parse the source with BeautifulSoup, which makes it easier to navigate through the source code to find the elements I want.</p>
+</div>
+<div id="finding-the-right-elements" class="section level4">
+<h4>Finding the Right Elements</h4>
+<p>When webscraping, it helps to get comfortable with inspecting the source code, and understanding a bit of html. For instance, I want to get the contents of this table:
+<img src="/img/scraping/counting_stats_table.png" /></p>
+<p>If I right click the table with my mouse and click “Inspect” in Google Chrome, a panel appears with this highlighted:</p>
 <p><img src="/img/scraping/counting_stats_inspect2.png" /></p>
-<p>I can navigate to the html responsible for that table using find() from Beautiful Soup, and passing in the title as text. It returns the text I’m looking for, so I’m confident that I’ve found the right place.</p>
-<pre class="python"><code>orioles_soup.find(text = &#39;Pitchers, Counting Stats&#39;)</code></pre>
-<pre><code>## &#39;Pitchers, Counting Stats&#39;</code></pre>
-<p>I’ll use find.Next() to get what whatever comes after that tag, and keep only the text.</p>
-<pre class="python"><code>crude_data = orioles_soup.find(text = &#39;Pitchers, Counting Stats&#39;).findNext().text
-print(crude_data[:30])</code></pre>
-<pre><code>## 
-## 
-## Player
-## T
-## Age
-## G
-## GS
-## IP
-## K
-## BB
-## HR</code></pre>
-<p>It’s bringing in the table header, which is what I want. However, it’ll be hard to work with if every record is on its own line. I’ll split the text so it’s separated by carriage returns.</p>
-<pre class="python"><code>crude_data = orioles_soup.find(text = &#39;Pitchers, Counting Stats&#39;).findNext().text.split(&quot;\n&quot;)
-print(crude_data[:50])</code></pre>
-<pre><code>## [&#39;&#39;, &#39;&#39;, &#39;Player&#39;, &#39;T&#39;, &#39;Age&#39;, &#39;G&#39;, &#39;GS&#39;, &#39;IP&#39;, &#39;K&#39;, &#39;BB&#39;, &#39;HR&#39;, &#39;H&#39;, &#39;R&#39;, &#39;ER&#39;, &#39;&#39;, &#39;&#39;, &#39;Kevin Gausman&#39;, &#39;R&#39;, &#39;26&#39;, &#39;31&#39;, &#39;31&#39;, &#39;176.0&#39;, &#39;162&#39;, &#39;55&#39;, &#39;21&#39;, &#39;174&#39;, &#39;82&#39;, &#39;77&#39;, &#39;&#39;, &#39;&#39;, &#39;Dylan Bundy&#39;, &#39;R&#39;, &#39;24&#39;, &#39;19&#39;, &#39;19&#39;, &#39;109.3&#39;, &#39;108&#39;, &#39;36&#39;, &#39;13&#39;, &#39;104&#39;, &#39;48&#39;, &#39;45&#39;, &#39;&#39;, &#39;&#39;, &#39;Chris Tillman&#39;, &#39;R&#39;, &#39;29&#39;, &#39;29&#39;, &#39;29&#39;, &#39;167.0&#39;]</code></pre>
-<p>Okay, this is starting to look closer to what I want, but there are two empty strings at the beginning of what should be each row. I’ll write a quick list comprehension to get rid of them.</p>
-<pre class="python"><code>data_cleaned = [i for i in crude_data if i != &#39;&#39;]
-print(data_cleaned[:50])</code></pre>
-<pre><code>## [&#39;Player&#39;, &#39;T&#39;, &#39;Age&#39;, &#39;G&#39;, &#39;GS&#39;, &#39;IP&#39;, &#39;K&#39;, &#39;BB&#39;, &#39;HR&#39;, &#39;H&#39;, &#39;R&#39;, &#39;ER&#39;, &#39;Kevin Gausman&#39;, &#39;R&#39;, &#39;26&#39;, &#39;31&#39;, &#39;31&#39;, &#39;176.0&#39;, &#39;162&#39;, &#39;55&#39;, &#39;21&#39;, &#39;174&#39;, &#39;82&#39;, &#39;77&#39;, &#39;Dylan Bundy&#39;, &#39;R&#39;, &#39;24&#39;, &#39;19&#39;, &#39;19&#39;, &#39;109.3&#39;, &#39;108&#39;, &#39;36&#39;, &#39;13&#39;, &#39;104&#39;, &#39;48&#39;, &#39;45&#39;, &#39;Chris Tillman&#39;, &#39;R&#39;, &#39;29&#39;, &#39;29&#39;, &#39;29&#39;, &#39;167.0&#39;, &#39;133&#39;, &#39;60&#39;, &#39;21&#39;, &#39;167&#39;, &#39;86&#39;, &#39;80&#39;, &#39;Zach Britton&#39;, &#39;L&#39;]</code></pre>
-<p>That looks much better. Now I’ll combine everything into tables. There are a few different ways to do this, and this was the fastest solution I could come up with. Certainly there are other, more efficient methods. First I’ll grab the headers from the data, and then remove them from the rest of the table data.</p>
-<pre class="python"><code>headers = data_cleaned[:12]
-data_no_headers = data_cleaned[12:]</code></pre>
-<p>I wrote a function to correctly grab the relevant values for each column.</p>
-<pre class="python"><code>def extract_column(number, data, upper_limit, num_cols):
-    name = []
-    name_list = []
-    for i in range(0, upper_limit):
-        name.append(number + i*num_cols)
-    for i in name:
-        name_list.append(data[i])
-    return name_list</code></pre>
-<p>This function takes a number (the index of the column I’ll be populating), the name of the data, the upper_limit (determined by the length of the data divided by the number of columns in the table), and the number of columns. I’ll use the Name column as an example.</p>
-<pre class="python"><code>names = extract_column(0, data_no_headers, 44, 12)
-print(names)</code></pre>
-<pre><code>## [&#39;Kevin Gausman&#39;, &#39;Dylan Bundy&#39;, &#39;Chris Tillman&#39;, &#39;Zach Britton&#39;, &#39;Mychal Givens&#39;, &#39;Brad Brach&#39;, &#39;Wade Miley&#39;, &#39;Darren O’Day&#39;, &#39;Vance Worley&#39;, &#39;Ubaldo Jimenez&#39;, &#39;Donnie Hart&#39;, &#39;Zach Stewart&#39;, &#39;Oliver Drake&#39;, &#39;Jed Bradley&#39;, &#39;Tyler Wilson&#39;, &#39;Logan Verrett&#39;, &#39;Hunter Harvey&#39;, &#39;Joe Gunkel&#39;, &#39;Tommy Hunter&#39;, &#39;Mike Wright&#39;, &#39;Nick Additon&#39;, &#39;Richard Rodriguez&#39;, &#39;Cody Satterwhite&#39;, &#39;Stefan Crichton&#39;, &#39;Jason Garcia&#39;, &#39;Logan Ondrusek&#39;, &#39;Todd Redmond&#39;, &#39;Brian Moran&#39;, &#39;David Hale&#39;, &#39;Jesus Liranzo&#39;, &#39;T.J. McFarland&#39;, &#39;Chris Lee&#39;, &#39;Jayson Aquino&#39;, &#39;Jefri Hernandez&#39;, &#39;Tom Gorzelanny&#39;, &#39;Bobby Bundy&#39;, &#39;Tanner Scott&#39;, &#39;Jimmy Yacabonis&#39;, &#39;Brandon Barker&#39;, &#39;Garrett Cortright&#39;, &#39;Trey Haley&#39;, &#39;Parker Bridwell&#39;, &#39;David Hess&#39;, &#39;Tim Berry&#39;]</code></pre>
-<p>The function has returned all the player names. I can proceed across all of the columns and get the relevant values for each column by incrementing the index in the extract_column function (so we’ll use 1 as an argument for Handedness or “T”, 2 as an argument for Age, and so on).</p>
-<p>Fangraphs has several different tables with varying number of columns, so when adapting this for other tables (for Pitcher Rates and Averages, or Pitcher Other, for instance), it’s important to consider the number of columns when calculating the upper_limit.</p>
-<pre class="python"><code>throws = extract_column(1, data_no_headers, 44, 12)
-age = extract_column(2, data_no_headers, 44, 12)
-games = extract_column(3, data_no_headers, 44, 12)
-games_started = extract_column(4, data_no_headers, 44, 12)
-innings_pitched = extract_column(5, data_no_headers, 44, 12)
-strikeouts = extract_column(6, data_no_headers, 44, 12)
-walks = extract_column(7, data_no_headers, 44, 12)
-homeruns = extract_column(8, data_no_headers, 44, 12)
-hits = extract_column(9, data_no_headers, 44, 12)
-runs = extract_column(10, data_no_headers, 44, 12)
-earned_runs = extract_column(11, data_no_headers, 44, 12)</code></pre>
-<p>So now I have several lists for each column. I will zip them all together into a pandas DataFrame.</p>
-<pre class="python"><code>pitch_data = pd.DataFrame(list(zip(names,
-                                   throws,
-                                   age,
-                                   games,
-                                   games_started,
-                                   innings_pitched,
-                                   strikeouts,
-                                   walks,
-                                   homeruns,
-                                   hits,
-                                   runs,
-                                   earned_runs)),
-                         columns = headers)</code></pre>
-<p>I’m going to print out the first 10 rows, just to make sure this is what I want.</p>
-<pre class="python"><code>pitch_data.head(10)</code></pre>
-<pre><code>##            Player  T Age   G  GS     IP    K  BB  HR    H   R  ER
-## 0   Kevin Gausman  R  26  31  31  176.0  162  55  21  174  82  77
-## 1     Dylan Bundy  R  24  19  19  109.3  108  36  13  104  48  45
-## 2   Chris Tillman  R  29  29  29  167.0  133  60  21  167  86  80
-## 3    Zach Britton  L  29  66   0   64.0   73  18   5   50  17  16
-## 4   Mychal Givens  R  27  63   0   79.3  101  31   7   63  28  26
-## 5      Brad Brach  R  31  63   0   74.0   87  29   8   60  27  25
-## 6      Wade Miley  L  30  29  29  165.7  135  55  22  176  92  86
-## 7    Darren O’Day  R  34  48   0   45.7   56  14   6   37  15  14
-## 8    Vance Worley  R  29  31  11  105.3   74  29  15  114  55  51
-## 9  Ubaldo Jimenez  R  33  27  25  140.3  124  65  18  142  80  75</code></pre>
-<p>Excellent! This is exactly what I want.</p>
-<p>This example can be used to scrape Fangraphs projection data for all teams, for multiple years. Scraping 2017 and 2018 data is easy with this method, but 2019 data looks different on the page, so the code should be modified accordingly. These adjustments are further described in my <a href="https://github.com/angelinepro/baseball_scraping">github repo</a>.</p>
+<p>This lets me know the html tag, class, and text responsible for the table I’m interested in, and I can use Beautiful Soup to find that table in the source code to extract its values later. That would look something like the code below.</p>
+<pre class="python"><code>soup_object.find(text = &#39;Pitchers, Counting Stats&#39;).findNext()</code></pre>
+<p>There are many functions available in Beautiful Soup to help navigate and find the right part of the page to extract, I highly recommend reading the <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">documentation</a>.</p>
+<p>Regular expressions is also very helpful for extracting precisely what I want, when there isn’t a straightforward way to get it from BeautifulSoup. I’m not super confident with regex, so I usually like to test my expressions before I let them loose. <a href="https://regex101.com/">This</a> is a great way to make sure I’m retrieving what I want to retrieve.</p>
+<p>The code below extracts the Team Name from the source code by keeping the first instance that matches the regex pattern.</p>
+<pre class="python"><code>team_clean = re.findall(&#39;[\s(A-z)]+[\|]&#39;, team_data)[0]</code></pre>
+</div>
+<div id="putting-it-all-together" class="section level4">
+<h4>Putting It All Together</h4>
+<p>Once I’ve extracted the data I want, I use pandas to put it all together into a dataframe. At this point, I can loop through my process for each of the pages I want to scrape from, and save the result as a csv, or as a pickle file. I am most familiar with saving my data as csv files, but I was introduced to pickling recently, and it’s changed my life. The best thing about pickle files is that they work well for pickling any kind of object, so you can pickle trained models, as well as dataframes. For this project, I stuck to saving dataframes as csvs.</p>
+</div>
 </div>
 <div id="scraping-baseball-reference" class="section level3">
 <h3>Scraping Baseball Reference</h3>
-<p>This site requires a different approach. It renders pages dynamically, so some tables may only populate once a user scrolls to a certain part of a page. If I attempt to scrape the page without some kind of action that makes the table appear, I won’t be able to find what I’m looking for in the page source. To fix this problem, I’ll be supplementing my previous approach with Selenium, which “pretends” to be a user whose actions I can control, and can perform the scrolls and clicks on my behalf, making it possible for me to automate the process.</p>
-<p>To start with, I installed ChromeDriver, a webdriver that opens the pages for me when I run commands in Selenium. Then I did the usual imports as above, as well as importing Selenium, and a module called time, which lets me pause web activity for some specified period of time, allowing the website to load.</p>
-<pre class="python"><code>from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-import time, os
-
-chromedriver = &quot;/Applications/chromedriver&quot; 
-os.environ[&quot;webdriver.chrome.driver&quot;] = chromedriver</code></pre>
-<p>Now I’ll start exploring the Baseball Reference page using chromedriver so I can scrape it. This will open a new browser window that navigates to the page. After the window opens, I’ll sleep this for 5 seconds to give it time to fully load.</p>
-<pre class="python"><code>driver = webdriver.Chrome(chromedriver)
-driver.get(&#39;https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml&#39;)
-time.sleep(5)</code></pre>
-<p><img src="/img/scraping/bbref_start_pitch.png" /></p>
-<p>The table that I care about is the “Player Starting Pitching” table halfway down the page, and it doesn’t show until I scroll down to it. I will have chromedriver scroll down to the 1500 pixel mark for me, and then wait a little while for that part to render.</p>
-<pre class="python"><code>driver.execute_script(&#39;window.scrollTo(0, 1500);&#39;)
-time.sleep(5)</code></pre>
+<div id="getting-the-source-code-1" class="section level4">
+<h4>Getting the Source Code</h4>
+<p>As I mentioned above, Baseball Reference has dynamic content, so parts of the page (including the table I want data from) only display once I scroll to them. This means that the page source code is different depending on how I interact with the page, and if I scrape the page before I scroll to the table, I’m not going to find the code for the table in the scraped source code.</p>
+<p>The simple answer would be to manually scroll if I’m scraping one or two pages. But if I’m scraping multiple pages, and I want to automate scrolling, clicking, or other user behavior, I can use <strong>Selenium</strong>.</p>
+<p>For pages with dynamic content, I’ve also found it useful to add a sleep timer from the <strong>time</strong> module, which pauses activity, allowing the website to fully load.</p>
+<p>Using the code below, I can load the page for 2016 season data, and scroll far enough down the page to display the table.</p>
+<pre class="python"><code>driver.get(&#39;https://www.baseball-reference.com/leagues/MLB/2016-starter-pitching.shtml&#39;)
+time.sleep(5)
+driver.execute_script(&quot;window.scrollTo(0, 1500);&quot;)</code></pre>
+<p>This action will display the table I want to scrape.</p>
 <p><img src="/img/scraping/starting_pitch_table.png" /></p>
-<p>There is an option to display this table as a CSV hidden in the menus, so I’m going to get chromeviewer to do it for me. I want it to click on where it says “Share &amp; more”. The location of this link in the source can be found by right-clicking and inspecting the source to find the relevant code. This is similar to the approach above for finding the part of the Fangraphs page with the relevant data.</p>
-<p><img src="/img/scraping/bbref_first_menu.png" /></p>
-<p>Xpaths are another way to navigate around the page, and I thought it might be more straightforward to use them to find the link to click, so I right-clicked on the element and copied the xpath from there.</p>
-<p><img src="/img/scraping/bbref_copy_xpath.png" /></p>
-<p>Now I can paste the copied xpath directly into the function find_element_by_xpath, and have chromedriver click on the link. I added another five seconds of sleep, again, just to give it time to load.</p>
-<pre class="python"><code>driver.find_element_by_xpath(&#39;//*[@id=&quot;all_players_starter_pitching&quot;]/div[1]/div/ul/li[1]&#39;).click()
-time.sleep(5)</code></pre>
-<p>Using the same method, I can have it then click directly on the link to “Get table as CSV”.</p>
+<p>Baseball Reference offers an option to “Get table as CSV”, which will make it much easier for me to turn the scraped table into a pandas dataframe.</p>
 <p><img src="/img/scraping/bbref_csv_table.png" /></p>
-<pre class="python"><code>driver.find_element_by_xpath(&#39;//*[@id=&quot;all_players_starter_pitching&quot;]/div[1]/div/ul/li[1]/div/ul/li[4]/button&#39;).click()</code></pre>
-<p>Now it’s displayed as csv!</p>
-<p><img src="/img/scraping/starting_as_csv.png" /></p>
-<p>So now that the page is showing what I want to scrape, I’ll grab the source and parse it using Beautiful Soup, as I did for the Fangraphs page.</p>
-<pre class="python"><code>soup = BeautifulSoup(driver.page_source, &#39;html.parser&#39;)
-soup.prettify().splitlines()[:20]</code></pre>
-<pre><code>## [&#39;&lt;html class=&quot;js cookies cors history localstorage sessionstorage canvas csspositionsticky pointerevents no-unicode no-touchevents vibrate matchmedia flexwrap desktop is_live is_modern overthrow-enabled&quot; data-root=&quot;/home/br/build&quot; data-version=&quot;klecko-&quot; itemscope=&quot;&quot; itemtype=&quot;https://schema.org/WebSite&quot; lang=&quot;en&quot; style=&quot;&quot;&gt;&#39;, &#39; &lt;head&gt;&#39;, &#39;  &lt;script src=&quot;https://www.googletagservices.com/activeview/js/current/osd.js?cb=%2Fr20100101&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script async=&quot;&quot; src=&quot;https://rules.quantcount.com/rules-p-UeXruRVtZz7w6.js&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script async=&quot;&quot; src=&quot;https://sb.scorecardresearch.com/beacon.js&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script async=&quot;&quot; src=&quot;https://hbx.media.net/bxl.js?cid=8CUFH1GPH&amp;amp;dn=www.baseball-reference.com&amp;amp;version=&amp;amp;https=1&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script async=&quot;&quot; src=&quot;https://secure.quantserve.com/quant.js&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script defer=&quot;&quot; src=&quot;https://tagan.adlightning.com/freestar/bl-2a28c82-a8566aed.js&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script defer=&quot;&quot; src=&quot;https://tagan.adlightning.com/freestar/b-5b1e2be.js&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;, &#39;  &lt;script async=&quot;&quot; src=&quot;https://tagan.adlightning.com/freestar/op.js&quot; type=&quot;text/javascript&quot;&gt;&#39;, &#39;  &lt;/script&gt;&#39;]</code></pre>
-<p>I’ll navigate to the table and return what comes next. Using inspect, it looks like I want to find a ‘pre’ tag with the id ‘csv_players_starter_pitching’.</p>
-<p><img src="/img/scraping/csv_players_starter_pitching.png" /></p>
-<pre class="python"><code>crude = soup.find(&#39;pre&#39;, id = &#39;csv_players_starter_pitching&#39;)</code></pre>
-<p>I’ll split by newline to make the data easier to work with.</p>
-<pre class="python"><code>crude_text = crude.text.split(&quot;\n&quot;)
-crude_text[:10]</code></pre>
-<pre><code>## [&#39;&#39;, &#39;Rk,Name,Age,Tm,IP,G,GS,Wgs,Lgs,ND,Wchp,Ltuf,Wtm,Ltm,tmW-L%,Wlst,Lsv,CG,SHO,QS,QS%,GmScA,Best,Wrst,BQR,BQS,sDR,lDR,RS/GS,RS/IP,IP/GS,Pit/GS,&lt;80,80-99,100-119,≥120,Max&#39;, &#39;1,Tim\xa0Adleman\\adlemti01,28,CIN,69.2,13,13,4,4,5,3,1,6,7,.462,2,2,0,0,5,38%,51.4,65,40,3,1,0,5,4.8,5.2,5.4,85,4,8,1,0,101&#39;, &#39;2,Andrew\xa0Albers*\\alberan01,30,MIN,17.0,6,2,0,0,2,0,0,0,2,.000,0,0,0,0,0,0%,34.0,41,27,5,1,1,0,6.4,14.1,3.3,73,1,1,0,0,88&#39;, &#39;3,Matt\xa0Albers\\alberma01,33,CHW,51.1,58,1,0,0,1,0,0,1,0,1.000,0,1,0,0,0,0%,53.0,53,53,24,11,1,0,4.2,0.0,2.0,25,1,0,0,0,25&#39;, &#39;4,Raul\xa0Alcantara\\alcanra01,23,OAK,22.1,5,5,1,3,1,1,0,1,4,.200,0,0,0,0,0,0%,40.2,54,22,4,0,0,5,4.2,4.3,4.5,76,3,1,1,0,104&#39;, &#39;5,Brett\xa0Anderson*\\anderbr04,28,LAD,11.1,4,3,0,2,1,0,0,1,2,.333,0,1,0,0,0,0%,26.0,40,16,3,1,0,3,3.8,0.9,3.0,53,3,0,0,0,72&#39;, &#39;6,Chase\xa0Anderson\\anderch01,28,MIL,151.2,31,30,9,11,10,7,1,12,18,.400,5,3,0,0,6,20%,48.8,75,17,12,5,1,16,4.7,4.3,5.0,87,6,20,4,0,110&#39;, &#39;7,Cody\xa0Anderson\\anderco01,25,CLE,60.2,19,9,1,4,4,0,0,2,7,.222,1,2,0,0,2,22%,38.1,72,21,12,5,0,7,4.7,4.2,4.7,79,4,5,0,0,98&#39;, &#39;8,Tyler\xa0Anderson*\\anderty01,26,COL,114.1,19,19,5,6,8,1,3,8,11,.421,3,4,0,0,12,63%,53.1,71,28,12,5,0,10,4.8,3.4,6.0,94,1,12,6,0,107&#39;]</code></pre>
-<p>This resembles the raw table data from Fangraphs before processing it all into a proper table. I’ll clean it all up, starting by removing empty strings, then splitting each line by commas, setting the first row as the header, removing it from the rest of the data, and finally converting it all into a pandas dataframe with the headers and index set appropriately.</p>
-<pre class="python"><code>bbrefdata_cleaned = [i for i in crude_text if i != &#39;&#39;] 
-bbrefdata_cleaned_newline = [i.split(&#39;,&#39;) for i in bbrefdata_cleaned] 
-bbrefdata_headers = bbrefdata_cleaned_newline[0:1][0] 
-bbrefdata_cleaned_newline2 = bbrefdata_cleaned_newline[1:] 
-season_data = pd.DataFrame(bbrefdata_cleaned_newline2, columns = bbrefdata_headers).set_index(&#39;Rk&#39;)</code></pre>
-<p>Again, I’m going to print out the first 10 rows, just to make sure this is what I want.</p>
-<pre class="python"><code>season_data.head(10)</code></pre>
-<pre><code>##                          Name Age   Tm     IP   G  ... &lt;80 80-99 100-119 ≥120  Max
-## Rk                                                 ...                            
-## 1       Tim Adleman\adlemti01  28  CIN   69.2  13  ...   4     8       1    0  101
-## 2    Andrew Albers*\alberan01  30  MIN   17.0   6  ...   1     1       0    0   88
-## 3       Matt Albers\alberma01  33  CHW   51.1  58  ...   1     0       0    0   25
-## 4    Raul Alcantara\alcanra01  23  OAK   22.1   5  ...   3     1       1    0  104
-## 5   Brett Anderson*\anderbr04  28  LAD   11.1   4  ...   3     0       0    0   72
-## 6    Chase Anderson\anderch01  28  MIL  151.2  31  ...   6    20       4    0  110
-## 7     Cody Anderson\anderco01  25  CLE   60.2  19  ...   4     5       0    0   98
-## 8   Tyler Anderson*\anderty01  26  COL  114.1  19  ...   1    12       6    0  107
-## 9     Matt Andriese\andrima01  26  TBR  127.2  29  ...   6    10       3    0  106
-## 10     Chris Archer\archech01  27  TBR  201.1  33  ...   1     8      24    0  118
-## 
-## [10 rows x 36 columns]</code></pre>
-<p>Perfect! It’s all there, and now I can analyze this dataframe using pandas. From here, I can save it as csv, so I don’t need to re-scrape the data, using the to_csv() function. Now that I’m all done with scraping and have my data, I’ll close the driver.</p>
+<p>I can use Selenium to click on the menu options that make it possible, if I know where to click. Inspect is handy for this.</p>
+<p><img src="/img/scraping/bbref_first_menu.png" /></p>
+<p>Selenium lets me use XPaths to locate specific parts of the source code (unlike Beautiful Soup), and I find this more straightforward. I can copy the XPath from the window that pops up when I inspect.</p>
+<p><img src="/img/scraping/bbref_copy_xpath.png" /></p>
+<p>In the end, my code looks like this, which clicks on the menu, waits five seconds, and then clicks on the link that displays the table as a csv.</p>
+<pre class="python"><code>driver.find_element_by_xpath(&#39;//*[@id=&quot;all_players_starter_pitching&quot;]/div[1]/div/ul/li[1]&#39;).click()
+time.sleep(5)
+driver.find_element_by_xpath(&#39;//*[@id=&quot;all_players_starter_pitching&quot;]/div[1]/div/ul/li[1]/div/ul/li[4]/button&#39;).click()</code></pre>
+<p>Now the page is displaying the content I want, and I can get the page source code and parse it using BeautifulSoup, as I did for the Fangraphs page.</p>
+</div>
+<div id="finding-the-right-elements-and-putting-it-all-together" class="section level4">
+<h4>Finding the Right Elements, and Putting It All Together</h4>
+<p>Now it’s a matter of navigating to the right part of source code and saving the part responsible for the table.</p>
+<pre class="python"><code>soup_object.find(&#39;pre&#39;, id = &#39;csv_players_starter_pitching&#39;)</code></pre>
+<p>From here, I can process the data, and again use pandas to put it all together into a dataframe, and save it all as a csv. This is also where I would run a loop, iterating over each of the pages I want to scrape from.</p>
+<p>Once I’m done using Selenium, I close the driver.</p>
 <pre class="python"><code>driver.close()</code></pre>
-<p>This example for scraping Baseball Reference can be used to scrape data for multiple years, using different tables. It may be too much work to use Selenium if you simply want the csv data for one year and one table, since it’s easy enough as a human to do all the clicking and copy the CSV to a text file. The real benefit of using Selenium comes from needing to scrape multiple years of data, or multiple tables across different years. Here, automating the process and writing a function to do it can really save time.</p>
+</div>
 </div>
 <div id="wrap-up" class="section level3">
 <h3>Wrap Up</h3>
-<p>I wrote a few functions that employ the principles described, that can be used to scrape the relevant pages on Fangraphs and Baseball Reference. These functions can be found on my <a href="https://github.com/angelinepro/portfolio_supplemental/tree/master/webscraping">github repo</a>. A word of caution about webscraping: these methods work so long as the webpage remains the same. Once the webpage is updated, some of the specific locations for the text of interest may also need to be updated, and the functions may need to be updated.</p>
-<p>Thanks for reading! I’ll be continuing to post about what I’m learning while at Metis, so stay tuned.</p>
+<p>More comprehensive code for scraping can be found on my <a href="https://github.com/angelinepro/predicting_quality_starts/tree/master/webscraping">github repo</a>. To see what I’m doing with all of this baseball data, see the next <a href="/../portfolio/quality-starts">post</a>.</p>
+<p>This post was inspired by project work at Metis. Thanks for reading, and stay tuned for more posts on what I’m learning!</p>
 </div>
