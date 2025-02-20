@@ -20,11 +20,11 @@ description: "Projections, reality, and counterfactuals"
 
 <div id="TOC">
 <ul>
-<li><a href="#where-were-we">Where were we?</a></li>
-<li><a href="#projections-vs.-2018-season-statistics">Projections vs. 2018 season statistics</a></li>
-<li><a href="#what-if-land">What-if land</a></li>
-<li><a href="#lessons-learned">Lessons learned</a></li>
-<li><a href="#next-steps">Next steps</a></li>
+<li><a href="#where-were-we" id="toc-where-were-we">Where were we?</a></li>
+<li><a href="#projections-vs.-2018-season-statistics" id="toc-projections-vs.-2018-season-statistics">Projections vs. 2018 season statistics</a></li>
+<li><a href="#what-if-land" id="toc-what-if-land">What-if land</a></li>
+<li><a href="#lessons-learned" id="toc-lessons-learned">Lessons learned</a></li>
+<li><a href="#next-steps" id="toc-next-steps">Next steps</a></li>
 </ul>
 </div>
 
@@ -73,7 +73,25 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
   filter(change ==&quot;outperform&quot;) %&gt;% 
   select(Name, draft_order, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="17%" />
+<col width="11%" />
+<col width="3%" />
+<col width="3%" />
+<col width="2%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="3%" />
+<col width="4%" />
+<col width="2%" />
+<col width="4%" />
+<col width="5%" />
+<col width="5%" />
+<col width="6%" />
+<col width="7%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -193,7 +211,25 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
   filter(change ==&quot;underperform&quot;) %&gt;% 
   select(Name, draft_order, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="18%" />
+<col width="12%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="6%" />
+<col width="6%" />
+<col width="7%" />
+<col width="8%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -354,6 +390,24 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
   select(Name, draft_order, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="15%" />
+<col width="12%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="8%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -446,6 +500,23 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="20%" />
+<col width="4%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -650,6 +721,23 @@ drafted_final &lt;- inner_join(end_bat_z, drafted, by = c(&quot;Name&quot;))</co
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="20%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="7%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -875,6 +963,23 @@ who had been selected in earlier rounds of the draft, and took the top five sinc
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="18%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="6%" />
+<col width="4%" />
+<col width="7%" />
+<col width="4%" />
+<col width="6%" />
+<col width="3%" />
+<col width="6%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -998,7 +1103,24 @@ who had been selected in earlier rounds of the draft, and took the top five sinc
   arrange(desc(tot_z)) %&gt;% 
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="19%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="7%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -1118,6 +1240,23 @@ who had been selected in earlier rounds of the draft, and took the top five sinc
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="20%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="6%" />
+<col width="6%" />
+<col width="8%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
@@ -1325,6 +1464,23 @@ who had been selected in earlier rounds of the draft, and took the top five sinc
   select(Name, R, f_R, HR, f_HR, RBI, f_RBI, SO, f_SO, SB, f_SB, OPS, f_OPS, tot_z, f_tot_z) %&gt;%
   knitr::kable()</code></pre>
 <table>
+<colgroup>
+<col width="20%" />
+<col width="3%" />
+<col width="4%" />
+<col width="3%" />
+<col width="5%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="5%" />
+<col width="3%" />
+<col width="5%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="9%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">Name</th>
