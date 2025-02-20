@@ -15,7 +15,7 @@ tags:
   - PCA
   - CorEx
 description: "Remembering the album, in the age of the playlist"
-image: "img/portfolio/guitarist.jpg"
+image: "img/portfolio/guitarist_silhouette.jpg"
 ---
 
 ### Who Still Listens to Albums?
